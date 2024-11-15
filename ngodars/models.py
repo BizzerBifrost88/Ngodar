@@ -27,6 +27,11 @@ class ADDRESS(models.Model):
     
 
 class PREMISE(models.Model):
+    PREMISE = [
+        {'hotel','Hotel'},
+        {'catering', 'Catering'},
+        {'food','Food'},
+    ]
     def validate_image(image):
         if image.size > 5 * 1024 * 1024:  # Limit to 2 MB
             raise ValidationError("Image file too large ( > 5MB )")
@@ -34,6 +39,7 @@ class PREMISE(models.Model):
             raise ValidationError("Unsupported file extension. Only .png, .jpg, and .jpeg are allowed.")
     premiseID = models.AutoField(primary_key=True)
     premisename = models.TextField()
+    premisetype = models.TextField(choices=PREMISE,default=None)
     premiseimage = models.ImageField(upload_to='premise_images/', validators=[validate_image])
     addressID = models.ForeignKey(ADDRESS, on_delete=models.CASCADE)
     merchantID = models.ForeignKey(MERCHANT, on_delete=models.CASCADE)
