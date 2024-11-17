@@ -1,8 +1,27 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const navLinks = document.querySelectorAll('.nav-link');
     const sections = document.querySelectorAll('section');
     const header = document.getElementById('navbar');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    // Show loading screen initially
+    loadingScreen.style.display = 'flex';
+
+    // Ensure the loading screen is visible for at least 1.5 seconds
+    const minimumLoadingTime = 1500; // Minimum time in milliseconds
+    const startTime = Date.now();
+
+    window.addEventListener('load', () => {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = minimumLoadingTime - elapsedTime;
+
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500); // Smooth fade-out
+        }, remainingTime > 0 ? remainingTime : 0);
+    });
 
     // Smooth scrolling
     navLinks.forEach(link => {
@@ -27,10 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
                 navLinks[i].classList.add('active');
-                if (i === 0) header.style.backgroundColor = '#202020';
-                else if (i === 1) header.style.backgroundColor = '#4C4C4C';
-                else if (i === 2) header.style.backgroundColor = '#202020';
-                else if (i === 3) header.style.backgroundColor = '#4C4C4C';
+                navLinks[i].style.color = '#00C896'; // Highlight current section
+            } else {
+                navLinks[i].style.color = ''; // Reset color
             }
         }
     };
@@ -39,8 +57,8 @@ document.addEventListener('DOMContentLoaded', () => {
     changeHeaderAndHighlight();
     window.addEventListener('scroll', changeHeaderAndHighlight);
     window.addEventListener('load', changeHeaderAndHighlight); // Ensure "Home" section highlights on load
-});
-document.addEventListener('DOMContentLoaded', () => {
+
+    // Smooth scroll for Explore button
     const exploreButton = document.getElementById('exploreButton');
     const aboutSection = document.querySelector('#about');
 

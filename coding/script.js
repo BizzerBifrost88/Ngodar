@@ -27,10 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (scrollPosition >= sectionTop && scrollPosition < sectionBottom) {
                 navLinks[i].classList.add('active');
-                if (i === 0) header.style.backgroundColor = '#202020';
-                else if (i === 1) header.style.backgroundColor = '#4C4C4C';
-                else if (i === 2) header.style.backgroundColor = '#00C896';
-                else if (i === 3) header.style.backgroundColor = '#4C4C4C';
+                navLinks[i].style.color = '#00C896'; // Highlight current section
+            } else {
+                navLinks[i].style.color = ''; // Reset color
             }
         }
     };
@@ -39,4 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     changeHeaderAndHighlight();
     window.addEventListener('scroll', changeHeaderAndHighlight);
     window.addEventListener('load', changeHeaderAndHighlight); // Ensure "Home" section highlights on load
+
+    // Smooth scroll for Explore button
+    const exploreButton = document.getElementById('exploreButton');
+    const aboutSection = document.querySelector('#about');
+
+    exploreButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        aboutSection.scrollIntoView({ behavior: 'smooth' });
+    });
 });

@@ -28,7 +28,7 @@ class ADDRESS(models.Model):
 
 class PREMISE(models.Model):
     PREMISE = [
-        {'hotel','Hotel'},
+        {'hall','Hall'},
         {'catering', 'Catering'},
         {'food','Food'},
     ]
