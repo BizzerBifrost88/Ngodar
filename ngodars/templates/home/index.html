@@ -8,15 +8,9 @@
     {% tailwind_css %}
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans">
-    <div id="loading-screen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
-        <div class="text-center">
-            <h1 class="text-3xl font-bold text-white mb-4">Ngodar</h1>
-            <p class="text-white">Loading...</p>
-        </div>
-    </div>
     <header id="navbar" class="sticky top-0 z-50 bg-gray-900 shadow-md transition-all">
         <div class="container mx-auto flex items-center justify-between px-4 py-3">
-            <h1 class="text-white text-xl font-bold uppercase">Ngodar</h1>
+            <a href="{% url 'index' %}"><h1 class="text-white text-xl font-bold uppercase">Ngodar</h1></a>
             <nav>
                 <ul class="flex space-x-4">
                     <li><a href="#home" class="nav-link text-white hover:text-green-400 transition">Home</a></li>
@@ -29,7 +23,7 @@
         </div>
     </header>
     <section id="home" class="min-h-screen flex items-center justify-center bg-gradient-to-r from-gray-900 to-gray-700 text-white px-4">
-        <div class="text-center max-w-2xl">
+        <div class="text-center max-w-2xl animate-on-scroll opacity-0 scale-90 transition-all duration-700">
             <h1 class="text-4xl font-bold mb-4">Welcome to Ngodar</h1>
             <h2 class="text-2xl font-light mb-4">Your One-Stop Solution for All Event & Food Needs</h2>
             <p class="mb-6">Discover the perfect platform for food delivery, hall rentals, and catering services tailored to your needs.</p>
@@ -38,28 +32,29 @@
     </section>
     <section id="about" class="min-h-screen bg-gray-200 text-gray-800 py-16 px-4 flex items-center">
         <div class="container mx-auto flex flex-wrap items-center gap-8">
-            <div class="flex-1 text-center">
+            <div class="flex-1 text-center animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <img src="{% static 'images/about.jpg' %}" alt="About Ngodar" class="w-full max-w-md mx-auto rounded-lg shadow-lg">
             </div>
-            <div class="flex-1">
+            <div class="flex-1 animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <h1 class="text-3xl font-bold mb-4">About Us</h1>
                 <p>Ngodar is designed to simplify your event planning and culinary experiences. Our platform connects you to trusted services in food delivery, hall rentals, and catering. Whether hosting a party or managing a corporate event, Ngodar ensures a seamless and enjoyable experience.</p>
             </div>
         </div>
     </section>
-    <section id="services" class="min-h-screen bg-gradient-to-r from-gray-700 to-green-500 text-white py-16 px-4 flex items-center">
+    <section id="services" class="min-h-screen bg-gradient-to-r from-gray-700 to-green-500 text-white py-16 px-4 flex flex-col items-center">
+        <h2 class="text-3xl font-bold mb-12 text-center animate-on-scroll opacity-0 scale-90 transition-all duration-700">Our Services to Offer</h2>
         <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="text-center">
+            <div class="text-center animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <img src="{% static 'images/food_delivery.jpg' %}" alt="Food Delivery" class="mx-auto rounded-lg shadow-lg">
                 <h3 class="text-xl font-semibold mt-4">Food Delivery</h3>
                 <p class="mt-2">Quick, delicious meals delivered to your door for your convenience.</p>
             </div>
-            <div class="text-center">
+            <div class="text-center animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <img src="{% static 'images/hall_renting.jpg' %}" alt="Hall Renting" class="mx-auto rounded-lg shadow-lg">
                 <h3 class="text-xl font-semibold mt-4">Hall Renting</h3>
                 <p class="mt-2">Find ideal venues for weddings, birthdays, and corporate events.</p>
             </div>
-            <div class="text-center">
+            <div class="text-center animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <img src="{% static 'images/catering.jpg' %}" alt="Catering" class="mx-auto rounded-lg shadow-lg">
                 <h3 class="text-xl font-semibold mt-4">Catering</h3>
                 <p class="mt-2">Customizable catering solutions to suit events of any size.</p>
@@ -68,13 +63,13 @@
     </section>
     <section id="contact" class="min-h-screen bg-gray-200 text-gray-800 py-16 px-4 flex items-center">
         <div class="container mx-auto flex flex-wrap items-center gap-8">
-            <div class="flex-1">
+            <div class="flex-1 animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <h1 class="text-3xl font-bold mb-4">Contact Us</h1>
                 <p><strong>Address:</strong> KOLEJ PROFESSIONAL MARA INDERA MAHKOTA, JALAN SUNGAI LEMBING, 25200 KUANTAN, PAHANG</p>
                 <p><strong>Phone:</strong> 017-620 7253</p>
                 <p><strong>Email:</strong> ngodar99@gmail.com</p>
             </div>
-            <div class="flex-1 text-center">
+            <div class="flex-1 text-center animate-on-scroll opacity-0 scale-90 transition-all duration-700">
                 <img src="{% static 'images/contact.jpg' %}" alt="Contact Ngodar" class="w-full max-w-md mx-auto rounded-lg shadow-lg">
             </div>
         </div>
