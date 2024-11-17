@@ -1,0 +1,117 @@
+
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #202020;
+    line-height: 1.8;
+    background-color: #f2ecff;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #202020;
+    padding: 10px 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center; /* Ensures proper alignment */
+    justify-content: space-between;
+    height: 70px; /* Fixed height for better alignment */
+}
+
+header .logo {
+    color: #f2ecff;
+    font-size: 24px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center; /* Center-align the logo vertically */
+    margin: 0;
+}
+
+header nav {
+    flex-grow: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+header nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 25px;
+    align-items: center; /* Align navigation links vertically with the logo */
+}
+
+header nav ul li {
+    margin: 0;
+}
+
+header nav ul li a {
+    text-decoration: none;
+    color: #F2ECFF;
+    font-size: 16px;
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+header nav ul li a:hover, header nav ul li a.active {
+    background-color: #00C896;
+    color: #202020;
+}
+
+/* Section Styles */
+section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+#home { 
+    background: linear-gradient(to right, #202020, #4C4C4C); 
+    color: #F2ECFF;
+    padding-top: 70px; /* Offset for sticky header */
+    margin-top: -70px; /* Prevent scrolling above "Home" section */
+}
+#about { background-color: #F2ECFF; color: #202020; display: flex; flex-direction: row-reverse; }
+#services { background: linear-gradient(to right, #4C4C4C, #00C896); color: #F2ECFF; display: flex; }
+#contact { background-color: #F2ECFF; color: #202020; }
+
+section .content {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    align-items: center;
+    gap: 20px;
+}
+
+section .content .text {
+    flex: 1;
+    padding: 10px;
+    text-align: left;
+}
+
+section .content .image {
+    flex: 1;
+    text-align: center;
+}
+
+section .content .image img {
+    max-width: 90%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+/* Footer */
+footer {
+    background-color: #4C4C4C;
+    color: #F2ECFF;
+    text-align: center;
+    padding: 10px 0;
+}

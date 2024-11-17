@@ -1,0 +1,98 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ngodar</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header id="navbar">
+        <div class="container">
+            <h1 class="logo">Ngodar</h1>
+            <nav>
+                <ul>
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#about" class="nav-link">About Us</a></li>
+                    <li><a href="#services" class="nav-link">Services</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <section id="home" class="home">
+        <div class="content">
+            <div class="text">
+                <h1>Welcome to Ngodar</h1>
+                <h2>Your One-Stop Solution for All Event & Food Needs</h2>
+                <p>Discover the perfect platform for food delivery, hall rentals, and catering services tailored to your needs.</p>
+            </div>
+            <div class="image">
+                <img src="{% static 'images/home.jpg' %}" alt="Ngodar Services">
+            </div>
+        </div>
+    </section>
+    <section id="about" class="about">
+        <div class="content">
+            <div class="image">
+                <img src="{% static 'images/about.jpg' %}" alt="About Ngodar">
+            </div>
+            <div class="text">
+                <h1>About Us</h1>
+                <p>Ngodar is designed to simplify your event planning and culinary experiences. Our platform connects you to trusted services in food delivery, hall rentals, and catering. Whether hosting a party or managing a corporate event, Ngodar ensures a seamless and enjoyable experience.</p>
+            </div>
+        </div>
+    </section>
+    <section id="services" class="services">
+        <div class="content">
+            <div class="service-item">
+                <div class="image">
+                    <img src="{% static 'images/food_delivery.jpg' %}" alt="Food Delivery">
+                </div>
+                <div class="text">
+                    <h3>Food Delivery</h3>
+                    <p>Quick, delicious meals delivered to your door for your convenience.</p>
+                </div>
+            </div>
+            <div class="service-item">
+                <div class="image">
+                    <img src="{% static 'images/hall_renting.jpg' %}" alt="Hall Renting">
+                </div>
+                <div class="text">
+                    <h3>Hall Renting</h3>
+                    <p>Find ideal venues for weddings, birthdays, and corporate events.</p>
+                </div>
+            </div>
+            <div class="service-item">
+                <div class="image">
+                    <img src="{% static 'images/catering.jpg' %}" alt="Catering">
+                </div>
+                <div class="text">
+                    <h3>Catering</h3>
+                    <p>Customizable catering solutions to suit events of any size.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section id="contact" class="contact">
+        <div class="content">
+            <div class="text">
+                <h1>Contact Us</h1>
+                <p><strong>Address:</strong> KOLEJ PROFESSIONAL MARA INDERA MAHKOTA, JALAN SUNGAI LEMBING, 25200 KUANTAN, PAHANG</p>
+                <p><strong>Phone:</strong> 017-620 7253</p>
+                <p><strong>Email:</strong> ngodar99@gmail.com</p>
+            </div>
+            <div class="image">
+                <img src="{% static 'images/contact.jpg' %}" alt="Contact Ngodar">
+            </div>
+        </div>
+    </section>
+    <footer>
+        <p>&copy; 2024 Ngodar. All rights reserved.</p>
+    </footer>
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
