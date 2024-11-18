@@ -202,5 +202,26 @@ def user_update_password(request):
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
+    user = USER.objects.get(userID=user_id)
+    
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_new_password = request.POST.get('confirm_new_password')
+
+        if check_password(user.password,current_password):
+            messages.error(request, "Current password is incorrect. Try again")
+        else:
+            if new_password != confirm_new_password:
+                messages.error(request, "Passwords do not match. Try again")
+            else:
+                try:
+                    user.password = make_password(new_password)
+                    user.save()
+                    messages.success(request, "Password updated successfully")
+                except Exception as e:
+                    messages.error(request, f"Error updating password. {e}")
+
+
     
     return render(request,'user/user_update_password.html')

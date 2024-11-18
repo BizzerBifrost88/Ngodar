@@ -11,6 +11,28 @@
         html {
             scroll-behavior: smooth;
         }
+
+        /* Popup animation */
+        @keyframes popup {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Add animation class */
+        .animate-popup {
+            animation: popup 0.5s ease-out forwards;
+        }
+
+        /* Initially hidden */
+        .hidden {
+            opacity: 0;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white font-sans">
@@ -21,10 +43,26 @@
         </div>
     </header>
 
+    <div class="space-y-2">
+        {% if messages %}
+            {% for message in messages %}
+                <p class="p-2 text-center rounded-lg border
+                {% if message.tags == 'success' %}
+                    text-green-500 bg-green-100 border-green-500
+                {% elif message.tags == 'error' %}
+                    text-red-500 bg-red-100 border-red-500
+                {% endif %}
+                 ">
+                {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    </div>
+
     <!-- Main Content -->
     <main class="min-h-screen">
         <!-- Profile Header -->
-        <section class="relative bg-gray-800 text-white py-12">
+        <section id="profileHeader" class="relative bg-gray-800 text-white py-12 hidden">
             <div class="container mx-auto text-center">
                 <img src="{% static 'images/user.png' %}" alt="User Profile Picture"
                      class="h-24 w-24 mx-auto rounded-full border-4 border-green-400 shadow-lg">
@@ -34,7 +72,7 @@
         </section>
 
         <!-- Profile Information -->
-        <section class="py-16 bg-gray-900">
+        <section id="profileInfo" class="py-16 bg-gray-900 hidden">
             <div class="container mx-auto max-w-4xl">
                 <!-- Profile Details -->
                 <div class="bg-gray-800 rounded-lg shadow-lg p-8">
@@ -50,7 +88,16 @@
                         </div>
                         <div class="flex justify-between items-center">
                             <p class="text-gray-300">Phone</p>
-                            <p class="text-white font-semibold">{{ user.phone }}</p>
+                            <div class="flex items-center">
+                                <!-- +60 Box -->
+                                <div class="px-3 py-1 bg-gray-700 text-gray-300 rounded-l-lg border-r border-gray-600">
+                                    +60
+                                </div>
+                                <!-- Phone Number -->
+                                <p class="text-white font-semibold bg-gray-800 px-4 py-1 rounded-r-lg">
+                                    {{ user.phone }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -59,7 +106,7 @@
                 <div class="flex justify-center mt-12 space-x-4">
                     <a href="{% url 'user_update' %}"
                        class="px-6 py-3 bg-green-400 text-gray-900 font-bold rounded hover:bg-green-500 transition">Edit Profile</a>
-                    <a href="#"
+                    <a href="{% url 'user_update_password' %}"
                        class="px-6 py-3 bg-gray-700 text-gray-300 font-bold rounded hover:bg-gray-600 transition">Change Password</a>
                 </div>
             </div>
@@ -70,5 +117,24 @@
     <footer class="bg-gray-900 text-center py-6">
         <p class="text-sm text-gray-400 mb-4">&copy; 2024 Ngodar. All Rights Reserved.</p>
     </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Add popup animation on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const profileHeader = document.getElementById('profileHeader');
+            const profileInfo = document.getElementById('profileInfo');
+
+            // Add animation to profile header
+            profileHeader.classList.remove('hidden');
+            profileHeader.classList.add('animate-popup');
+
+            // Add animation to profile information section
+            setTimeout(() => {
+                profileInfo.classList.remove('hidden');
+                profileInfo.classList.add('animate-popup');
+            }, 300); // Delay to stagger animations
+        });
+    </script>
 </body>
 </html>
