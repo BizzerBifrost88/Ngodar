@@ -17,4 +17,6 @@ urlpatterns = [
     path('user-home/user-profile/', views.user_profile, name='user_profile'),
     path('user-home/merchant-register/', views.merchant_register, name='merchant_register'),
     path('user-home/receipt/', views.receipt, name='receipt'),
+    path('user-home/user-profile/update/', views.user_update, name='user_update'),
+    path('user-home/user-profile/update-password/', views.user_update_password, name='user_update_password'),
 ] 

@@ -1,0 +1,94 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ngodar - Update Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-gray-900 shadow-md">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <a href="{% url 'user_home' %}"><h1 class="text-lg font-bold uppercase">Ngodar</h1></a>
+            <nav class="flex space-x-6 items-center">
+                <a href="{% url 'user_profile' %}" class="hover:text-green-400 transition">Profile</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="min-h-screen flex items-center justify-center py-16">
+        <div class="bg-gray-800 rounded-lg shadow-lg p-8 max-w-2xl w-full">
+            <h2 class="text-3xl font-bold text-center mb-6">Update Profile</h2>
+            <form id="updateForm" method="post" action="">
+                {% csrf_token %}
+                <!-- Username -->
+                <div class="mb-6">
+                    <label for="username" class="block text-gray-300 mb-2">Username</label>
+                    <input type="text" name="username" id="username" value="{{ user.username }}" 
+                        class="w-full px-4 py-3 rounded-lg bg-gray-900 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-800" 
+                        placeholder="Enter your username" required>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-6">
+                    <label for="email" class="block text-gray-300 mb-2">Email</label>
+                    <input type="email" name="email" id="email" value="{{ user.email }}" 
+                        class="w-full px-4 py-3 rounded-lg bg-gray-900 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-800" 
+                        placeholder="Enter your email" required>
+                </div>
+
+                <!-- Phone -->
+                <div class="mb-6">
+                    <label for="phone" class="block text-gray-300 mb-2">Phone</label>
+                    <input type="text" name="phone" id="phone" value="{{ user.phone }}" 
+                        class="w-full px-4 py-3 rounded-lg bg-gray-900 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-800" 
+                        placeholder="Enter your phone number" required>
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-300 mb-2">Password</label>
+                    <input type="password" name="password" id="password" 
+                        class="w-full px-4 py-3 rounded-lg bg-gray-900 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-800" 
+                        placeholder="Enter your password" required>
+                </div>
+                <div class="mb-6">
+                    <label for="confirm-password" class="block text-gray-300 mb-2">Confirm Password</label>
+                    <input type="password" name="confirm-password" id="confirm-password"  
+                        class="w-full px-4 py-3 rounded-lg bg-gray-900 text-white placeholder-gray-500 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-800" 
+                        placeholder="Confirm your password" required>
+                </div>
+
+                <!-- Save Button -->
+                <div class="flex justify-center">
+                    <button type="submit" id="saveButton"
+                        class="px-6 py-3 bg-green-400 text-gray-900 font-bold rounded-lg hover:bg-green-500 transition">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-center py-6">
+        <p class="text-sm text-gray-400 mb-4">&copy; 2024 Ngodar. All Rights Reserved.</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        document.getElementById('updateForm').addEventListener('submit', function (event) {
+            const saveButton = document.getElementById('saveButton');
+            saveButton.textContent = 'Saving...'; // Update button text
+            saveButton.disabled = true; // Disable the button to prevent multiple submissions
+        });
+    </script>
+</body>
+</html>

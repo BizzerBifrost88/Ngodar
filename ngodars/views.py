@@ -160,3 +160,47 @@ def receipt(request):
         return redirect('login')
     
     return render(request, 'user/receipt.html')
+
+def user_update(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    user = USER.objects.get(userID=user_id)
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        password = request.POST.get('password')
+        confirm_password = request.POST.get('confirm-password')
+
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return redirect('user_update')
+        else:
+            try:
+                user.username = username
+                user.email = email
+                user.phone = phone
+                user.save()
+                messages.success(request, "User updated successfully")
+            
+            except Exception as e:
+                messages.error(request, "Error updating user")
+
+    context = {
+        'user': user,
+    }
+    
+    return render(request,'user/user_update.html', context)
+
+def user_update_password(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    return render(request,'user/user_update_password.html')
