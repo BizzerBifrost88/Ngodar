@@ -16,4 +16,5 @@ urlpatterns = [
     path('user-home/hall-list/', views.hall_list, name='hall_list'),
     path('user-home/user-profile/', views.user_profile, name='user_profile'),
     path('user-home/merchant-register/', views.merchant_register, name='merchant_register'),
+    path('user-home/receipt/', views.receipt, name='receipt'),
 ] 

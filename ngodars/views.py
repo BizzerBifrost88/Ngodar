@@ -94,7 +94,13 @@ def user_home(request):
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
-    return render(request, 'user/user_home.html')
+    
+    if MERCHANT.objects.filter(userID=user_id):
+        ismerchant = 'yes'
+        return render(request, 'user/user_home.html', {'ismerchant': ismerchant})
+    else:
+        ismerchant = None
+        return render(request, 'user/user_home.html', {'ismerchant': ismerchant})
 
 def food_list(request):
     user_id = request.session.get('user_id')
@@ -124,7 +130,33 @@ def hall_list(request):
     return render(request, 'user/hall_list.html')
 
 def user_profile(request):
-    return render(request, 'user/user_profile.html')
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    user = USER.objects.get(userID=user_id)
+    context = {
+        'user': user,
+    }
+    
+    return render(request, 'user/user_profile.html', context)
 
 def merchant_register(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
     return render(request, 'user/merchant_register.html')
+
+def receipt(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    return render(request, 'user/receipt.html')

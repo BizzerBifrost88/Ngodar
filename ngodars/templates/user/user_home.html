@@ -93,8 +93,15 @@
                          class="absolute right-0 mt-2 bg-gray-800 text-white shadow-lg rounded-lg hidden w-48">
                         <a href="{% url 'user_profile' %}" 
                            class="block px-4 py-2 hover:bg-gray-700 transition">User Profile</a>
+                           <a href="{% url 'receipt' %}" 
+                           class="block px-4 py-2 hover:bg-gray-700 transition">Receipt</a>
+                           {% if ismerchant == 'yes' %}
+                           <a href="{% url 'merchant_dashboard' %}"
+                           class="block px-4 py-2 hover:bg-gray-700 transition">Merchant Dashboard</a>
+                           {% else %}
                         <a href="{% url 'merchant_register' %}" 
                            class="block px-4 py-2 hover:bg-gray-700 transition">Register as Merchant</a>
+                           {% endif %}
                         <a href="{% url 'logout' %}" 
                            class="block px-4 py-2 hover:bg-gray-700 transition">Logout</a>
                     </div>

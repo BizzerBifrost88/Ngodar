@@ -45,10 +45,16 @@
                 </div>
 
                 <!-- Phone Field -->
-                <div class="mb-6">
+                <div class="mb-6 flex items-center rounded-lg bg-gray-700 border border-gray-600 focus-within:ring-2 focus-within:ring-green-400">
+                    <!-- Non-clickable Box for +60 -->
+                    <div
+                        class="px-4 py-3 bg-transparent text-white placeholder-gray-400 rounded-l-xl bg-gray-700 border border-gray-600 focus:outline-none">
+                        +60
+                    </div>
+                    <!-- Phone Input Field -->
                     <input type="text" name="phone" id="phone" required
-                        class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-600"
-                        placeholder="Enter your phone number">
+                        class="w-full px-4 py-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
+                        placeholder="e.g 17xxxxxxx">
                 </div>
 
                 <!-- Email Field -->
@@ -85,10 +91,10 @@
             <div class="mt-8 text-center">
                 <p>
                     Already have an account?
-                    <a href="{% url 'login' %}" class="text-green-400 underline">Login</a>
+                    <a href="{% url 'login' %}" class="text-green-400">Login</a>
                 </p>
                 <p class="mt-4">
-                    <a href="{% url 'index' %}" class="text-white hover:text-green-400 hover:underline text-sm">
+                    <a href="{% url 'index' %}" class="text-white hover:text-green-400 text-sm">
                         Back to Home
                     </a>
                 </p>
