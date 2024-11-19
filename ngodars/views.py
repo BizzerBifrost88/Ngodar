@@ -104,12 +104,55 @@ def user_home(request):
 
 def food_list(request):
     user_id = request.session.get('user_id')
+    location = request.session.get('location')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
+    
     return render(request, 'user/food_list.html')
+
+def food_search(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    return render(request, 'user/food_search.html')
+
+def food_premise(request,premiseID):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    premise = PREMISE.objects.get(premiseID=premiseID)
+    
+    return render(request, 'user/food_premise.html')
+
+def user_location(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+
+    
+    return render(request, 'user/user_location.html')
+
+def add_address(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    
+    return render(request, 'user/user_location.html')
 
 def catering_list(request):
     user_id = request.session.get('user_id')

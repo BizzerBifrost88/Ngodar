@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Location</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Popup Animation */
+        @keyframes popup {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Default state for items */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+        }
+
+        /* Active state for animations */
+        .animate-visible {
+            animation: popup 0.7s ease-out forwards;
+        }
+
+        /* Address Card Styling */
+        .address-card {
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            background-color: #1f2937; /* Tailwind gray-900 */
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .address-card:hover {
+            transform: scale(1.02);
+        }
+
+        .address-card h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #f9fafb; /* Tailwind gray-100 */
+            margin-bottom: 0.5rem;
+        }
+
+        .address-card p {
+            color: #d1d5db; /* Tailwind gray-300 */
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-gray-900 shadow-md">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <a href="{% url 'user_home' %}" class="text-lg font-bold uppercase">Ngodar</a>
+        </div>
+    </header>
+
+    <!-- User Location Section -->
+    <section id="user_location" class="min-h-screen py-20">
+        <div class="container mx-auto px-10 lg:px-20">
+            <h1 class="text-4xl font-bold mb-10 text-center animate-on-scroll">Your Addresses</h1>
+            {% if addresses %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for address in addresses %}
+                        <div class="address-card animate-on-scroll">
+                            <h3>{{ address.fullname }}</h3>
+                            <p>{{ address.unit }}, {{ address.streetname }}</p>
+                            <p>{{ address.statearea }}, {{ address.poscode }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-center text-lg font-semibold animate-on-scroll">No addresses found. Please add an address.</p>
+            {% endif %}
+            <div class="flex justify-center mt-10 animate-on-scroll">
+                <a href="{% url 'add_address' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded shadow-lg transition-transform transform hover:scale-105">
+                    Add Address
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-center py-6">
+        <p class="text-sm text-gray-400 mb-4">&copy; 2024 Ngodar. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // Intersection Observer for popup animations
+        const animatedItems = document.querySelectorAll('.animate-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                    observer.unobserve(entry.target); // Stop observing once the animation is triggered
+                }
+            });
+        }, {
+            threshold: 0.2 // Trigger when 20% of the item is visible
+        });
+
+        animatedItems.forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html>

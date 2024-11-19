@@ -12,6 +12,10 @@ urlpatterns = [
     # user section
     path('user-home/', views.user_home, name='user_home'),
     path('user-home/food-list/', views.food_list, name='food_list'),
+    path('user-home/food-list/food-search', views.food_search, name='food_search'),
+    path('user-home/food-list/food-premise/<int:premiseID>', views.food_premise, name='food_premise'),
+    path('user-home/food-list/location/', views.user_location, name='user_location'),
+    path('user-home/food-list/location/add_address/', views.add_address, name='add_address'),
     path('user-home/catering-list/', views.catering_list, name='catering_list'),
     path('user-home/hall-list/', views.hall_list, name='hall_list'),
     path('user-home/user-profile/', views.user_profile, name='user_profile'),
