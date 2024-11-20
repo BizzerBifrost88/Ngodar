@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipts - Ngodar</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes popup {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+        }
+
+        .animate-visible {
+            animation: popup 0.7s ease-out forwards;
+        }
+
+        /* Make sure the body takes up full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* Custom scrollbar for Webkit browsers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(31, 41, 55, 0.5);
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4B5563;
+            border-radius: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-r from-gray-900 to-gray-700 text-white flex flex-col h-full">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-gray-900 shadow-md">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <a href="{% url 'user_home' %}"><h1 class="text-lg font-bold uppercase">Ngodar</h1></a>
+            <nav class="flex space-x-6 items-center relative">
+                <div class="relative">
+                    <img src="{% static 'images/user.png' %}" alt="User Icon" 
+                         class="h-8 w-8 rounded-full cursor-pointer" id="user-icon">
+                    <div id="user-dropdown" 
+                         class="absolute right-0 mt-2 bg-gray-800 text-white shadow-lg rounded-lg hidden w-48">
+                        <a href="{% url 'user_profile' %}" 
+                           class="block px-4 py-2 hover:bg-gray-700 transition">User Profile</a>
+                        <a href="{% url 'receipt' %}" 
+                           class="block px-4 py-2 hover:bg-gray-700 transition">Receipt</a>
+                        {% if ismerchant == 'yes' %}
+                        <a href="{% url 'merchant_dashboard' %}"
+                           class="block px-4 py-2 hover:bg-gray-700 transition">Merchant Dashboard</a>
+                        {% else %}
+                        <a href="{% url 'merchant_register' %}" 
+                           class="block px-4 py-2 hover:bg-gray-700 transition">Register as Merchant</a>
+                        {% endif %}
+                        <a href="{% url 'logout' %}" 
+                           class="block px-4 py-2 hover:bg-gray-700 transition">Logout</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="space-y-2">
+        {% if messages %}
+            {% for message in messages %}
+                <p class="p-2 text-center rounded-lg border animate-on-scroll
+                {% if message.tags == 'success' %}
+                    text-green-500 bg-green-100 border-green-500
+                {% elif message.tags == 'error' %}
+                    text-red-500 bg-red-100 border-red-500
+                {% endif %}
+                 ">
+                {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Main Content - Full Height -->
+    <div class="flex-grow flex flex-col">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-center text-green-400 mb-6 animate-on-scroll">Your Receipts</h1>
+        </div>
+        
+        <!-- Scrollable Receipt Container -->
+        <div class="flex-grow overflow-auto custom-scrollbar px-4 pb-6">
+            <div class="container mx-auto">
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {% for booking in bookings %}
+                    {% if booking.payment == 'paid' and booking.userID.userID == user_id %}
+                    <div class="bg-gray-800 rounded-xl shadow-xl p-6 animate-on-scroll">
+                        <div class="border-b border-gray-700 pb-4 mb-4">
+                            <h2 class="text-xl font-semibold text-green-400">Receipt #{{ booking.bookingID }}</h2>
+                            <p class="text-gray-400">{{ booking.datetime|date:"F d, Y" }}</p>
+                            <p class="text-gray-400">{{ booking.datetime|time:"H:i" }}</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Item:</span>
+                                <span class="font-medium">{{ booking.itemID.itemname }}</span>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Premise:</span>
+                                <span class="font-medium">{{ booking.itemID.premiseID.premisename }}</span>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Type:</span>
+                                <span class="font-medium">{{ booking.itemID.premiseID.premisetype }}</span>
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Price:</span>
+                                <span class="font-medium text-green-400">RM {{ booking.itemID.price }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-gray-700">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-400">Payment Status:</span>
+                                <span class="px-3 py-1 bg-green-400 text-gray-900 rounded-full text-sm font-semibold">
+                                    {{ booking.payment|title }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <div class="col-span-full text-center py-8">
+                        <p class="text-gray-400 text-lg animate-on-scroll">No receipts found.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-center py-4 mt-auto">
+        <p class="text-sm">&copy; 2024 Ngodar. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // User dropdown functionality
+        const userIcon = document.getElementById('user-icon');
+        const userDropdown = document.getElementById('user-dropdown');
+    
+        userIcon.addEventListener('click', () => {
+            userDropdown.classList.toggle('hidden');
+        });
+    
+        document.addEventListener('click', (event) => {
+            if (!userIcon.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.add('hidden');
+            }
+        });
+
+        // Intersection Observer for popup animations
+        const animatedItems = document.querySelectorAll('.animate-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.2
+        });
+
+        animatedItems.forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html>

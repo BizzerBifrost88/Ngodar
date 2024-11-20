@@ -117,7 +117,7 @@ def food_list(request):
     
     # Handle search functionality
     if request.method == 'GET':
-        search = request.GET.get('search', '')
+        search = request.GET.get('search_query', '')
         if search:
             return redirect('food_search', search_query=search)
     
@@ -164,21 +164,47 @@ def food_list(request):
 
 def food_search(request, search_query):
     user_id = request.session.get('user_id')
+    location_data = request.session.get('locations')
     
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    # Case-insensitive search using __icontains
-    data = PREMISE.objects.filter(premisename__icontains=search_query, premisetype='food')
-    
-    context = {
-        'data': data,
-        'search_query': search_query
-    }
-    
-    return render(request, 'user/food_search.html', context)
+    try:
+        user = USER.objects.get(userID=user_id)
+        context = {'user': user}
+        
+        # Case-insensitive search using __icontains
+        premises = PREMISE.objects.filter(
+            premisename__icontains=search_query, 
+            premisetype='food'
+        )
+        
+        # Add location context if available
+        if location_data:
+            try:
+                address_obj = ADDRESS.objects.get(
+                    userID=user,
+                    is_used=True
+                )
+                context['location'] = address_obj
+            except ADDRESS.DoesNotExist:
+                request.session['locations'] = None
+        
+        context.update({
+            'premises': premises,
+            'search_query': search_query
+        })
+        
+        return render(request, 'user/food_search.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('user_location')
 
 def food_premise(request,premiseID):
     user_id = request.session.get('user_id')
@@ -364,7 +390,7 @@ def catering_list(request):
     
     # Handle search functionality
     if request.method == 'GET':
-        search = request.GET.get('search', '')
+        search = request.GET.get('search_query', '')
         if search:
             return redirect('catering_search', search_query=search)
     
@@ -410,21 +436,47 @@ def catering_list(request):
 
 def catering_search(request, search_query):
     user_id = request.session.get('user_id')
+    location_data = request.session.get('locations')
     
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    # Case-insensitive search using __icontains
-    data = PREMISE.objects.filter(premisename__icontains=search_query, premisetype ='catering')
-    
-    context = {
-        'data': data,
-        'search_query': search_query
-    }
-    
-    return render(request, 'user/catering_search.html', context)
+    try:
+        user = USER.objects.get(userID=user_id)
+        context = {'user': user}
+        
+        # Case-insensitive search using __icontains
+        premises = PREMISE.objects.filter(
+            premisename__icontains=search_query, 
+            premisetype='catering'
+        )
+        
+        # Add location context if available
+        if location_data:
+            try:
+                address_obj = ADDRESS.objects.get(
+                    userID=user,
+                    is_used=True
+                )
+                context['location'] = address_obj
+            except ADDRESS.DoesNotExist:
+                request.session['locations'] = None
+        
+        context.update({
+            'premises': premises,
+            'search_query': search_query
+        })
+        
+        return render(request, 'user/catering_search.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('user_location')
 
     
     
@@ -444,7 +496,7 @@ def hall_list(request):
     
     # Handle search functionality
     if request.method == 'GET':
-        search = request.GET.get('search', '')
+        search = request.GET.get('search_query', '')
         if search:
             return redirect('hall_search', search_query=search)
     
@@ -489,21 +541,47 @@ def hall_list(request):
     
 def hall_search(request, search_query):
     user_id = request.session.get('user_id')
+    location_data = request.session.get('locations')
     
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    # Case-insensitive search using __icontains
-    data = PREMISE.objects.filter(premisename__icontains=search_query, premisetype ='hall')
-    
-    context = {
-        'data': data,
-        'search_query': search_query
-    }
-    
-    return render(request, 'user/hall_search.html', context)
+    try:
+        user = USER.objects.get(userID=user_id)
+        context = {'user': user}
+        
+        # Case-insensitive search using __icontains
+        premises = PREMISE.objects.filter(
+            premisename__icontains=search_query, 
+            premisetype='hall'
+        )
+        
+        # Add location context if available
+        if location_data:
+            try:
+                address_obj = ADDRESS.objects.get(
+                    userID=user,
+                    is_used=True
+                )
+                context['location'] = address_obj
+            except ADDRESS.DoesNotExist:
+                request.session['locations'] = None
+        
+        context.update({
+            'premises': premises,
+            'search_query': search_query
+        })
+        
+        return render(request, 'user/hall_search.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('user_location')
 
 def user_profile(request):
     user_id = request.session.get('user_id')
@@ -526,6 +604,24 @@ def merchant_register(request):
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'accept':
+            # Get the user object
+            user = USER.objects.get(userID=user_id)
+            
+            # Create new merchant with the same name as user
+            merchant = MERCHANT.objects.create(
+                merchantname=user.username,
+                userID=user
+            )
+            merchant.save()
+            
+            messages.success(request, "Successfully registered as a merchant!")
+            return redirect('merchant_dashboard')
+        else:
+            return redirect('user_home')
+    
     return render(request, 'user/merchant_register.html')
 
 def receipt(request):
@@ -535,7 +631,12 @@ def receipt(request):
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    return render(request, 'user/receipt.html')
+    bookings = BOOKING.objects.all().order_by('-datetime')
+    return render(request, 'user/receipt.html', {
+        'bookings': bookings,
+        'user_id': user_id,
+        'ismerchant': request.session.get('ismerchant', 'no')
+    })
 
 def user_update(request):
     user_id = request.session.get('user_id')
@@ -601,3 +702,13 @@ def user_update_password(request):
 
     
     return render(request,'user/user_update_password.html')
+
+# merchant section
+def merchant_dashboard(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    return render(request,'merchant/merchant_dashboard.html')

@@ -58,8 +58,8 @@
             </div>
             <nav class="flex space-x-6 items-center">
                 <!-- Search Form -->
-                <form method="GET" action="" class="flex">
-                    <input type="text" name="search" placeholder="Search restaurants..." 
+                <form method="get" action="{% url 'food_list' %}" class="flex">
+                    <input type="text" name="search_query" id="search_query" placeholder="Search restaurants..." 
                            class="px-4 py-2 rounded-l bg-gray-800 border-gray-700 focus:outline-none focus:border-green-500">
                     <button type="submit" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-r">
                         Search
@@ -122,6 +122,11 @@
             </div>
         {% endif %}
     </section>
+
+   <!-- Footer -->
+   <footer class="bg-gray-900 text-center py-6">
+    <p class="text-sm text-gray-400 mb-4">&copy; 2024 Ngodar. All Rights Reserved.</p>
+    </footer>
 
     <script>
         // Intersection Observer for popup animations

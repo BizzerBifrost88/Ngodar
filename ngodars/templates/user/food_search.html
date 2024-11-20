@@ -1,0 +1,170 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Ngodar</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes popup {
+            0% {
+                opacity: 0;
+                transform: translateY(20px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+        }
+
+        .animate-visible {
+            animation: popup 0.7s ease-out forwards;
+        }
+
+        .premise-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .premise-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .content-wrapper {
+            min-height: calc(100vh - 200px); /* Adjust based on footer height */
+            padding-bottom: 80px; /* Space for sticky button */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+    <!-- Messages Section -->
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="bg-{{ message.tags }} p-4 text-center animate-on-scroll">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-gray-900 shadow-md">
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <div class="flex items-center space-x-10">
+                <a href="{% url 'user_home' %}" class="text-lg font-bold uppercase">Ngodar</a>
+            </div>
+            <nav class="flex space-x-6 items-center">
+                <!-- Search Form -->
+                <form method="get" action="{% url 'food_list' %}" class="flex">
+                    <input type="text" name="search_query" id="search_query" 
+                           placeholder="Search restaurants..." 
+                           value="{{ search_query }}"
+                           class="px-4 py-2 rounded-l bg-gray-800 border-gray-700 focus:outline-none focus:border-green-500">
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-r">
+                        Search
+                    </button>
+                </form>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Current Location Display -->
+    {% if location %}
+        <div class="bg-gray-800 py-2">
+            <div class="container mx-auto px-6">
+                <p class="text-gray-400">
+                    Delivering to: {{location.fullname}}, {{ location.unit }}, {{ location.streetname }}, {{ location.statearea }}, {{ location.poscode }}
+                </p>
+            </div>
+        </div>
+    {% else %}
+        <div class="bg-gray-800 py-2">
+            <div class="container mx-auto px-6">
+                <p class="text-gray-400">
+                    Please set your location to see available restaurants.
+                </p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Main Content Wrapper -->
+    <div class="content-wrapper">
+        <!-- Search Results Section -->
+        <div class="container mx-auto px-6 py-8">
+            <h2 class="text-2xl font-bold mb-6 animate-on-scroll">
+                Search Results for "{{ search_query }}"
+            </h2>
+            
+            <!-- Premises Grid -->
+            <section class="container mx-auto mt-8 px-4 flex-grow">
+                {% if premises %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {% for premise in premises %}
+                            <a href="{% url 'premise_detail' premise.premiseID %}" class="block">
+                                <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg premise-card animate-on-scroll cursor-pointer">
+                                    {% if premise.premiseimage %}
+                                        <img src="{{ premise.premiseimage.url }}" alt="{{ premise.premisename }}" 
+                                             class="w-full h-48 object-cover">
+                                    {% else %}
+                                        <div class="w-full h-48 bg-gray-700 flex items-center justify-center">
+                                            <span class="text-gray-500">No Image Available</span>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="p-4">
+                                        <h3 class="text-xl font-bold mb-2">{{ premise.premisename }}</h3>
+                                        <p class="text-gray-400">{{ premise.unit }}, {{ premise.streetname }}</p>
+                                        <p class="text-gray-400">{{ premise.statearea }}, {{ premise.poscode }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-8">
+                        <p class="text-gray-400 animate-on-scroll">No restaurants found matching "{{ search_query }}"</p>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+
+    <!-- Sticky Back Button -->
+    <div class="fixed bottom-0 left-0 right-0 bg-gray-900 border-t border-gray-800 py-4 px-6 z-50">
+        <div class="container mx-auto flex justify-center">
+            <a href="{% url 'food_list' %}" class="bg-green-500 hover:bg-green-600 px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200">
+                Back to All Restaurants
+            </a>
+        </div>
+    </div>
+
+    
+
+    <script>
+        // Intersection Observer for popup animations
+        const animatedItems = document.querySelectorAll('.animate-on-scroll');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.2
+        });
+
+        animatedItems.forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html>
