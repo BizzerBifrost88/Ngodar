@@ -103,24 +103,82 @@ def user_home(request):
         return render(request, 'user/user_home.html', {'ismerchant': ismerchant})
 
 def food_list(request):
+    """
+    View to display food list based on user's selected location
+    """
     user_id = request.session.get('user_id')
-    location = request.session.get('location')
+    location_data = request.session.get('locations')
+    
+    # Check user authentication and type
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
+    # Handle search functionality
+    if request.method == 'GET':
+        search = request.GET.get('search', '')
+        if search:
+            return redirect('food_search', search_query=search)
     
-    return render(request, 'user/food_list.html')
+    try:
+        user = USER.objects.get(userID=user_id)
+        context = {'user': user}
+        
+        # Get the actual address object from database if location is selected
+        if location_data:
+            try:
+                address_obj = ADDRESS.objects.get(
+                    userID=user,
+                    is_used=True
+                )
+                context['address'] = address_obj
+                
+                # Get premises based on postcode
+                premises = PREMISE.objects.filter(poscode=location_data['poscode'])
+                premise_type = PREMISE.objects.filter(premisetype='food')
+                context['premise_type'] = premise_type
+                context['premises'] = premises
+                context['location'] = address_obj
+            except ADDRESS.DoesNotExist:
+                # Handle case where address doesn't exist anymore
+                request.session['locations'] = None
+                premises = PREMISE.objects.all()
+                context['premises'] = premises
+                messages.info(request, "Selected address not found. Showing all available restaurants.")
+        else:
+            # No address selected - show all premises
+            premises = PREMISE.objects.all()
+            context['premises'] = premises
+        
+        return render(request, 'user/food_list.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('user_location')
+        
+    
 
-def food_search(request):
+def food_search(request, search_query):
     user_id = request.session.get('user_id')
+    
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    return render(request, 'user/food_search.html')
+    # Case-insensitive search using __icontains
+    data = PREMISE.objects.filter(premisename__icontains=search_query, premisetype='food')
+    
+    context = {
+        'data': data,
+        'search_query': search_query
+    }
+    
+    return render(request, 'user/food_search.html', context)
 
 def food_premise(request,premiseID):
     user_id = request.session.get('user_id')
@@ -134,43 +192,318 @@ def food_premise(request,premiseID):
     return render(request, 'user/food_premise.html')
 
 def user_location(request):
+    """
+    View to display and manage user addresses
+    """
+    # Check user authentication and type
     user_id = request.session.get('user_id')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
+    try:
+        # Retrieve the user object
+        user = USER.objects.get(userID=user_id)
+        
+        # Retrieve addresses for the user
+        addresses = ADDRESS.objects.filter(userID=user)
+        
+        # Check if there's a currently used address
+        used_address = addresses.filter(is_used=True).first()
+        
+        context = {
+            'addresses': addresses,
+            'used_address_id': used_address.addressID if used_address else None
+        }
 
-    
-    return render(request, 'user/user_location.html')
+        # Store only necessary address data in session
+        if used_address:
+            request.session['locations'] = {
+                'addressID': used_address.addressID,
+                'poscode': used_address.poscode,
+                'streetname': used_address.streetname,
+                'statearea': used_address.statearea,
+                'unit': used_address.unit,
+                'fullname': used_address.fullname
+            }
+        else:
+            request.session['locations'] = None
+        
+        return render(request, 'user/user_location.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+
+def use_address(request, address_id):
+    """
+    View to handle marking an address as used
+    """
+    if request.method == 'POST':
+        user_id = request.session.get('user_id')
+        
+        try:
+            # Get the user
+            user = USER.objects.get(userID=user_id)
+            
+            # Reset all addresses for this user to not used
+            ADDRESS.objects.filter(userID=user).update(is_used=False)
+            
+            # Get the specific address
+            address = ADDRESS.objects.get(addressID=address_id, userID=user)
+            
+            # Mark this address as used
+            address.is_used = True
+            address.save()
+            
+            # Store postcode in session for premises filtering
+            request.session['location_postcode'] = address.poscode
+            
+            messages.success(request, "Address marked as used successfully")
+            return redirect('user_location')
+        
+        except USER.DoesNotExist:
+            messages.error(request, "User not found")
+        except ADDRESS.DoesNotExist:
+            messages.error(request, "Address not found")
+        
+        return redirect('user_location')
+
+def delete_address(request, address_id):
+    """
+    View to handle address deletion
+    """
+    if request.method == 'POST':
+        user_id = request.session.get('user_id')
+        
+        try:
+            # Get the user
+            user = USER.objects.get(userID=user_id)
+            
+            # Get the specific address
+            address = ADDRESS.objects.get(addressID=address_id, userID=user)
+            
+            # Remove from session if this was the used address
+            if request.session.get('used_address_id') == address_id:
+                del request.session['used_address_id']
+            
+            # Delete the address
+            address.delete()
+            
+            messages.success(request, "Address deleted successfully")
+        
+        except USER.DoesNotExist:
+            messages.error(request, "User not found")
+        except ADDRESS.DoesNotExist:
+            messages.error(request, "Address not found")
+        
+        return redirect('user_location')
 
 def add_address(request):
+    # Check if user is logged in via session
     user_id = request.session.get('user_id')
+    
+    # Verify user type and authentication
     if not request.session.get('user_type') == 'user':
         request.session.flush()
-        messages.error(request, "You do not have permission to view this page. Please login again")
+        messages.error(request, "You do not have permission to add address. Please login again.")
         return redirect('login')
     
+    if request.method == 'POST':
+        # Extract form data
+        fullname = request.POST.get('fullname')
+        unit = request.POST.get('unit')
+        streetname = request.POST.get('streetname')
+        statearea = request.POST.get('statearea')
+        poscode = request.POST.get('poscode')
+        
+        # Validate input
+        if not all([fullname, unit, streetname, statearea, poscode]):
+            messages.error(request, "Please fill in all fields.")
+            return render(request, 'user/add_address.html')
+        
+        try:
+            # Retrieve the user object
+            user = USER.objects.get(userID=user_id)
+            
+            # Create new address
+            new_address = ADDRESS.objects.create(
+                fullname=fullname,
+                unit=unit,
+                streetname=streetname,
+                statearea=statearea,
+                poscode=poscode,
+                userID=user
+            )
+            
+            # Success message and redirect
+            messages.success(request, "Address added successfully!")
+        
+        except USER.DoesNotExist:
+            messages.error(request, "User not found. Please login again.")
+            return redirect('login')
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
     
-    return render(request, 'user/user_location.html')
+    # GET request
+    return render(request, 'user/add_address.html')
 
 def catering_list(request):
+    """
+    View to display food list based on user's selected location
+    """
     user_id = request.session.get('user_id')
+    location_data = request.session.get('locations')
+    
+    # Check user authentication and type
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    return render(request, 'user/catering_list.html')
+    # Handle search functionality
+    if request.method == 'GET':
+        search = request.GET.get('search', '')
+        if search:
+            return redirect('catering_search', search_query=search)
+    
+    try:
+        user = USER.objects.get(userID=user_id)
+        context = {'user': user}
+        
+        # Get the actual address object from database if location is selected
+        if location_data:
+            try:
+                address_obj = ADDRESS.objects.get(
+                    userID=user,
+                    is_used=True
+                )
+                context['address'] = address_obj
+                
+                # Get premises based on postcode
+                premises = PREMISE.objects.filter(poscode=location_data['poscode'])
+                premise_type = PREMISE.objects.filter(premisetype='catering')
+                context['premise_type'] = premise_type
+                context['premises'] = premises
+                context['location'] = address_obj
+            except ADDRESS.DoesNotExist:
+                # Handle case where address doesn't exist anymore
+                request.session['locations'] = None
+                premises = PREMISE.objects.all()
+                context['premises'] = premises
+                messages.info(request, "Selected address not found. Showing all available restaurants.")
+        else:
+            # No address selected - show all premises
+            premises = PREMISE.objects.all()
+            context['premises'] = premises
+        
+        return render(request, 'user/catering_list.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('user_location')
+   
+
+def catering_search(request, search_query):
+    user_id = request.session.get('user_id')
+    
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    # Case-insensitive search using __icontains
+    data = PREMISE.objects.filter(premisename__icontains=search_query, premisetype ='catering')
+    
+    context = {
+        'data': data,
+        'search_query': search_query
+    }
+    
+    return render(request, 'user/catering_search.html', context)
+
+    
+    
 
 def hall_list(request):
+    """
+    View to display food list based on user's selected location
+    """
     user_id = request.session.get('user_id')
+    location_data = request.session.get('locations')
+    
+    # Check user authentication and type
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    return render(request, 'user/hall_list.html')
+    # Handle search functionality
+    if request.method == 'GET':
+        search = request.GET.get('search', '')
+        if search:
+            return redirect('hall_search', search_query=search)
+    
+    try:
+        user = USER.objects.get(userID=user_id)
+        context = {'user': user}
+        
+        # Get the actual address object from database if location is selected
+        if location_data:
+            try:
+                address_obj = ADDRESS.objects.get(
+                    userID=user,
+                    is_used=True
+                )
+                context['address'] = address_obj
+                
+                # Get premises based on postcode
+                premises = PREMISE.objects.filter(poscode=location_data['poscode'])
+                premise_type = PREMISE.objects.filter(premisetype='hall')
+                context['premise_type'] = premise_type
+                context['premises'] = premises
+                context['location'] = address_obj
+            except ADDRESS.DoesNotExist:
+                # Handle case where address doesn't exist anymore
+                request.session['locations'] = None
+                premises = PREMISE.objects.all()
+                context['premises'] = premises
+                messages.info(request, "Selected address not found. Showing all available restaurants.")
+        else:
+            # No address selected - show all premises
+            premises = PREMISE.objects.all()
+            context['premises'] = premises
+        
+        return render(request, 'user/hall_list.html', context)
+        
+    except USER.DoesNotExist:
+        messages.error(request, "User not found. Please login again")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('user_location')
+    
+def hall_search(request, search_query):
+    user_id = request.session.get('user_id')
+    
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    # Case-insensitive search using __icontains
+    data = PREMISE.objects.filter(premisename__icontains=search_query, premisetype ='hall')
+    
+    context = {
+        'data': data,
+        'search_query': search_query
+    }
+    
+    return render(request, 'user/hall_search.html', context)
 
 def user_profile(request):
     user_id = request.session.get('user_id')

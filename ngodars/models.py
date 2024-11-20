@@ -27,6 +27,7 @@ class ADDRESS(models.Model):
     unit = models.TextField(default=None)
     streetname = models.TextField(default=None)
     userID = models.ForeignKey(USER, on_delete=models.CASCADE, default=None)
+    is_used = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.fullname}"
     

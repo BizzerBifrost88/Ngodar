@@ -59,7 +59,7 @@
             <nav class="flex space-x-6 items-center">
                 <!-- Search Form -->
                 <form method="GET" action="" class="flex">
-                    <input type="text" name="search" placeholder="Search restaurants..." 
+                    <input type="text" name="search" placeholder="Search catering services..." 
                            class="px-4 py-2 rounded-l bg-gray-800 border-gray-700 focus:outline-none focus:border-green-500">
                     <button type="submit" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-r">
                         Search
@@ -83,7 +83,7 @@
     <div class="bg-gray-800 py-2">
         <div class="container mx-auto px-6">
             <p class="text-gray-400">
-                Please set your location to see available restaurants.
+                Please set your location to see available catering services.
             </p>
         </div>
     </div>
@@ -94,7 +94,7 @@
         {% if premises %}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {% for premise in premises %}
-                    {% if premise.premisetype == 'food' %}
+                    {% if premise.premisetype == 'catering' %}
                         <a href="{% url 'premise_detail' premise.premiseID %}" class="block">
                             <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg premise-card animate-on-scroll cursor-pointer">
                                 {% if premise.premiseimage %}
@@ -118,7 +118,7 @@
             </div>
         {% else %}
             <div class="text-center py-8">
-                <p class="text-gray-400 animate-on-scroll">No restaurants found in your area yet.</p>
+                <p class="text-gray-400 animate-on-scroll">No catering services found in your area yet.</p>
             </div>
         {% endif %}
     </section>
