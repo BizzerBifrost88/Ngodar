@@ -1,0 +1,165 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merchant Dashboard - Ngodar</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @keyframes dashboard-enter {
+            0% {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .graph-container {
+            width: 100%;
+            max-height: 250px; /* Explicitly set max height */
+            height: 250px; /* Fixed height */
+            overflow: hidden; /* Prevent any overflow */
+        }
+        .graph-wrapper {
+            height: 100%; /* Full height of parent */
+            position: relative;
+        }
+        .dashboard-section {
+            animation: dashboard-enter 0.8s ease-out forwards;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex">
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 p-6">
+        <a href="{% url 'merchant_dashboard' %}"><h1 class="text-2xl font-bold mb-8 text-green-400">NGODAR</h1></a>
+        <nav class="space-y-4">
+            <a href="#dashboard" class="block py-2 px-4 bg-green-500 text-white rounded">Dashboard</a>
+            <a href="{% url 'premise' %}" class="block py-2 px-4 hover:bg-gray-700 rounded">Premises</a>
+            <a href="#items" class="block py-2 px-4 hover:bg-gray-700 rounded">Items</a>
+            <a href="{% url 'user_home' %}" class="block py-2 px-4 hover:bg-gray-700 rounded">User Home</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow p-8 dashboard-section">
+        <h2 class="text-3xl font-bold mb-6 text-green-400">
+            DASHBOARD
+        </h2>
+        
+        <div class="space-y-6">
+            <!-- Sales Quantity Chart -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-green-400">Sales Quantity per Month</h3>
+                <div class="graph-wrapper">
+                    <canvas id="salesQuantityChart" class="graph-container"></canvas>
+                </div>
+            </div>
+            
+            <!-- Sales Revenue Chart -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-semibold mb-4 text-green-400">Sales Revenue per Month</h3>
+                <div class="graph-wrapper">
+                    <canvas id="salesRevenueChart" class="graph-container"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Parse months, quantities, and revenues from Django context
+            const months = JSON.parse('{{ months|escapejs }}');
+            const quantities = JSON.parse('{{ quantities|escapejs }}');
+            const revenues = JSON.parse('{{ revenues|escapejs }}');
+    
+            // Sales Quantity Chart
+            const quantityCtx = document.getElementById('salesQuantityChart').getContext('2d');
+            const salesQuantityChart = new Chart(quantityCtx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Sales Quantity',
+                        data: quantities,
+                        backgroundColor: 'rgba(0, 200, 150, 0.6)', // Ngodar green
+                        borderColor: '#00C896',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Sales'
+                            }
+                        }
+                    }
+                }
+            });
+    
+            // Sales Revenue Chart
+            const revenueCtx = document.getElementById('salesRevenueChart').getContext('2d');
+            const salesRevenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Total Revenue (RM)',
+                        data: revenues,
+                        borderColor: '#00C896', // Ngodar green
+                        backgroundColor: 'rgba(0, 200, 150, 0.2)',
+                        borderWidth: 3,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue (RM)'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

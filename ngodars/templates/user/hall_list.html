@@ -113,13 +113,14 @@
                                 </div>
                             </div>
                         </a>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <p class="text-gray-400 animate-on-scroll">No hall found in your area yet.</p>
+                        </div>
                     {% endif %}
                 {% endfor %}
             </div>
-        {% else %}
-            <div class="text-center py-8">
-                <p class="text-gray-400 animate-on-scroll">No hall found in your area yet.</p>
-            </div>
+        
         {% endif %}
     </section>
 

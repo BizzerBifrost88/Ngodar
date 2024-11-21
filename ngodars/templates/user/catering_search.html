@@ -108,7 +108,7 @@
                 {% if premises %}
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {% for premise in premises %}
-                            <a href="{% url 'premise_detail' premise.premiseID %}" class="block">
+                            <a href="{% url 'catering_premise' premise.premiseID %}" class="block">
                                 <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg premise-card animate-on-scroll cursor-pointer">
                                     {% if premise.premiseimage %}
                                         <img src="{{ premise.premiseimage.url }}" alt="{{ premise.premisename }}" 

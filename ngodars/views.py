@@ -1,12 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.http import JsonResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.db.models import Q
 from django.utils import timezone
 from ngodars.models import USER, MERCHANT, ADDRESS, PREMISE, ITEM, BOOKING
 from django.contrib.auth.hashers import make_password, check_password
+import json
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth
+import os
 
 # Create your views here.
 
@@ -206,16 +210,129 @@ def food_search(request, search_query):
         messages.error(request, f"An error occurred: {str(e)}")
         return redirect('user_location')
 
-def food_premise(request,premiseID):
+def food_premise(request,premise_id):
     user_id = request.session.get('user_id')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    premise = PREMISE.objects.get(premiseID=premiseID)
+    premise = PREMISE.objects.get(premiseID=premise_id)
     
-    return render(request, 'user/food_premise.html')
+    # Get all items for this premise
+    items = ITEM.objects.filter(premiseID=premise)
+    
+    # Handle item selection and booking
+    if request.method == 'POST':
+        selected_item_id = request.POST.get('item_id')
+        
+        try:
+            selected_item = ITEM.objects.get(itemID=selected_item_id)
+            
+            # Create a new booking
+            booking = BOOKING.objects.create(
+                userID=request.user,  # Assumes you have user authentication
+                itemID=selected_item,
+                datetime=timezone.now(),
+                payment='not pay'
+            )
+            
+            # Redirect to payment page (you'll implement this later)
+            return redirect('payment', booking_id=booking.bookingID)
+        
+        except ITEM.DoesNotExist:
+            # Handle invalid item selection
+            pass
+    
+    context = {
+        'premise': premise,
+        'items': items
+    }
+    
+    return render(request, 'user/food_premise.html', context)
+    
+def catering_premise(request,premise_id):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    premise = PREMISE.objects.get(premiseID=premise_id)
+    
+    # Get all items for this premise
+    items = ITEM.objects.filter(premiseID=premise)
+    
+    # Handle item selection and booking
+    if request.method == 'POST':
+        selected_item_id = request.POST.get('item_id')
+        
+        try:
+            selected_item = ITEM.objects.get(itemID=selected_item_id)
+            
+            # Create a new booking
+            booking = BOOKING.objects.create(
+                userID=request.user,  # Assumes you have user authentication
+                itemID=selected_item,
+                datetime=timezone.now(),
+                payment='not pay'
+            )
+            
+            # Redirect to payment page (you'll implement this later)
+            return redirect('payment', booking_id=booking.bookingID)
+        
+        except ITEM.DoesNotExist:
+            # Handle invalid item selection
+            pass
+    
+    context = {
+        'premise': premise,
+        'items': items
+    }
+    
+    return render(request, 'user/catering_premise.html', context)
+
+def hall_premise(request,premise_id):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    premise = PREMISE.objects.get(premiseID=premise_id)
+    
+    # Get all items for this premise
+    items = ITEM.objects.filter(premiseID=premise)
+    
+    # Handle item selection and booking
+    if request.method == 'POST':
+        selected_item_id = request.POST.get('item_id')
+        
+        try:
+            selected_item = ITEM.objects.get(itemID=selected_item_id)
+            
+            # Create a new booking
+            booking = BOOKING.objects.create(
+                userID=request.user,  # Assumes you have user authentication
+                itemID=selected_item,
+                datetime=timezone.now(),
+                payment='not pay'
+            )
+            
+            # Redirect to payment page (you'll implement this later)
+            return redirect('payment', booking_id=booking.bookingID)
+        
+        except ITEM.DoesNotExist:
+            # Handle invalid item selection
+            pass
+    
+    context = {
+        'premise': premise,
+        'items': items
+    }
+    
+    return render(request, 'user/hall_premise.html', context)
+
 
 def user_location(request):
     """
@@ -705,10 +822,116 @@ def user_update_password(request):
 
 # merchant section
 def merchant_dashboard(request):
+    # Verify merchant authentication
     user_id = request.session.get('user_id')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    return render(request,'merchant/merchant_dashboard.html')
+    # Get the current merchant
+    try:
+        merchant = MERCHANT.objects.get(userID=user_id)
+    except MERCHANT.DoesNotExist:
+        messages.error(request, "Merchant profile not found.")
+        return redirect('user_home')
+    
+    # Aggregate sales by quantity and revenue per month
+    monthly_sales = BOOKING.objects.filter(
+        itemID__premiseID__merchantID=merchant
+    ).annotate(
+        month=TruncMonth('datetime')
+    ).values('month').annotate(
+        total_quantity=Count('bookingID'),
+        total_revenue=Sum('itemID__price')
+    ).order_by('month')
+    
+    # Generate dynamic months (last 6 months)
+    current_date = datetime.now()
+    
+    # If no sales data, generate empty months
+    if not monthly_sales:
+        months = [(current_date - timedelta(days=30*i)).strftime('%B %Y') for i in range(5, -1, -1)]
+        quantities = [0] * 6
+        revenues = [0.0] * 6
+    else:
+        # Process existing sales data
+        months = [sale['month'].strftime('%B %Y') for sale in monthly_sales]
+        quantities = [sale['total_quantity'] for sale in monthly_sales]
+        revenues = [float(sale['total_revenue']) for sale in monthly_sales]
+        
+        # Ensure we always have 6 months of data
+        while len(months) < 6:
+            # Add missing months at the beginning
+            previous_month = datetime.strptime(months[0], '%B %Y') - timedelta(days=30)
+            months.insert(0, previous_month.strftime('%B %Y'))
+            quantities.insert(0, 0)
+            revenues.insert(0, 0.0)
+    
+    context = {
+        'merchant': merchant,
+        'months': json.dumps(months),
+        'quantities': json.dumps(quantities),
+        'revenues': json.dumps(revenues),
+    }
+    
+    return render(request, 'merchant/merchant_dashboard.html', context)
+
+def premise(request):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    # Retrieve premises for the current merchant
+    merchant = MERCHANT.objects.get(userID=user_id)
+    premises = PREMISE.objects.filter(merchantID=merchant)
+    
+    return render(request, 'merchant/premise.html', {'premises': premises})
+
+def add_premise(request):
+    # Authentication check
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    if request.method == 'POST':
+        # Get the current logged-in merchant
+        user_id = request.session.get('user_id')
+        try:
+            user = USER.objects.get(userID=user_id)
+            merchant = MERCHANT.objects.get(userID=user)
+            
+            # Collect form data
+            premise_data = {
+                'premisename': request.POST.get('premisename'),
+                'premisetype': request.POST.get('premisetype'),
+                'streetname': request.POST.get('streetname'),
+                'unit': request.POST.get('unit'),
+                'poscode': request.POST.get('poscode'),
+                'statearea': request.POST.get('statearea'),
+                'merchantID': merchant,
+                'premiseimage': request.FILES.get('premiseimage')
+            }
+            
+            # Create and save the premise
+            premise = PREMISE(**premise_data)
+            premise.save()
+            
+            messages.success(request, "Premise added successfully!")
+            return redirect('premises')
+        
+        except (USER.DoesNotExist, MERCHANT.DoesNotExist) as e:
+            messages.error(request, "Error: Unable to find merchant account.")
+            return redirect('login')
+    
+    return render(request, 'merchant/add_premise.html')
+
+
+def update_premise(request, premise_id):
+    pass
+
+def delete_premise(request, premise_id):
+    pass

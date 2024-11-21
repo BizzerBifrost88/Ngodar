@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Premise - Ngodar</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex">
+    <!-- Sidebar -->
+    <div class="w-64 bg-gray-800 p-6">
+        <a href="{% url 'merchant_dashboard' %}"><h1 class="text-2xl font-bold mb-8 text-green-400">NGODAR</h1></a>
+        <nav class="space-y-4">
+            <a href="{% url 'merchant_dashboard' %}" class="block py-2 px-4 hover:bg-gray-700 rounded">Dashboard</a>
+            <a href="{% url 'premise' %}" class="block py-2 px-4 bg-green-500 text-white rounded">Premises</a>
+            <a href="#" class="block py-2 px-4 hover:bg-gray-700 rounded">Items</a>
+            <a href="{% url 'user_home' %}" class="block py-2 px-4 hover:bg-gray-700 rounded">User Home</a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-grow p-8 relative">
+        <h2 class="text-3xl font-bold mb-6 text-green-400">ADD PREMISE</h2>
+        
+        <!-- Add Premise Form -->
+        <form method="POST" enctype="multipart/form-data" class="bg-gray-800 rounded-lg p-8 animate-fade-in">
+            {% csrf_token %}
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Premise Name -->
+                <div class="mb-4">
+                    <label for="premisename" class="block text-green-400 mb-2">Premise Name</label>
+                    <input type="text" id="premisename" name="premisename" required 
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Premise Type -->
+                <div class="mb-4">
+                    <label for="premisetype" class="block text-green-400 mb-2">Premise Type</label>
+                    <select id="premisetype" name="premisetype" required 
+                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                        <option value="">Select Premise Type</option>
+                        <option value="hall">Hall</option>
+                        <option value="catering">Catering</option>
+                        <option value="food">Food</option>
+                    </select>
+                </div>
+
+                <!-- Street Name -->
+                <div class="mb-4">
+                    <label for="streetname" class="block text-green-400 mb-2">Street Name</label>
+                    <input type="text" id="streetname" name="streetname" required 
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Unit -->
+                <div class="mb-4">
+                    <label for="unit" class="block text-green-400 mb-2">Unit Number</label>
+                    <input type="text" id="unit" name="unit" 
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Postal Code -->
+                <div class="mb-4">
+                    <label for="poscode" class="block text-green-400 mb-2">Postal Code</label>
+                    <input type="text" id="poscode" name="poscode" required 
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- State/Area -->
+                <div class="mb-4">
+                    <label for="statearea" class="block text-green-400 mb-2">State/Area</label>
+                    <input type="text" id="statearea" name="statearea" required 
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
+                </div>
+
+                <!-- Premise Image -->
+                <div class="mb-4 md:col-span-2">
+                    <label for="premiseimage" class="block text-green-400 mb-2">Premise Image (max 5MB, .png, .jpg, .jpeg)</label>
+                    <input type="file" id="premiseimage" name="premiseimage" accept=".png,.jpg,.jpeg" 
+                           class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-green-500 file:text-white hover:file:bg-green-600">
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-6">
+                <button type="submit" 
+                        class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                    Add Premise
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
