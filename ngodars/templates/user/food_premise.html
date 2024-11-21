@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ premise.premisename }} - Menu</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .item-card {
@@ -54,8 +55,7 @@
                     <form method="post" class="block">
                         {% csrf_token %}
                         <input type="hidden" name="item_id" value="{{ item.itemID }}">
-                        <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg item-card cursor-pointer hover:bg-gray-700" 
-                             onclick="this.closest('form').submit()">
+                        <button type="submit" class="bg-gray-800 rounded-lg overflow-hidden shadow-lg item-card w-full text-left">
                             <div class="flex items-center p-4">
                                 {% if item.itemimage %}
                                     <img src="{{ item.itemimage.url }}" alt="{{ item.itemname }}" 
@@ -75,7 +75,7 @@
                                     <span class="bg-green-500 text-white px-3 py-1 rounded">Select</span>
                                 </div>
                             </div>
-                        </div>
+                        </button>
                     </form>
                 {% endfor %}
             </div>
@@ -87,6 +87,4 @@
     <!-- Footer -->
     <footer class="bg-gray-900 text-center py-6 mt-8">
         <p class="text-sm text-gray-400">&copy; 2024 Ngodar. All Rights Reserved.</p>
-    </footer>
-</body>
-</html>
+    </footer

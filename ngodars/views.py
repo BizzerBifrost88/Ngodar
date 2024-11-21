@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib import messages
 from datetime import datetime, timedelta
 from django.http import JsonResponse, HttpResponseRedirect
@@ -10,6 +11,7 @@ from django.contrib.auth.hashers import make_password, check_password
 import json
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncMonth
+from django.core.exceptions import ValidationError
 import os
 
 # Create your views here.
@@ -210,7 +212,7 @@ def food_search(request, search_query):
         messages.error(request, f"An error occurred: {str(e)}")
         return redirect('user_location')
 
-def food_premise(request,premise_id):
+def food_premise(request, premise_id):
     user_id = request.session.get('user_id')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
@@ -228,21 +230,11 @@ def food_premise(request,premise_id):
         
         try:
             selected_item = ITEM.objects.get(itemID=selected_item_id)
-            
-            # Create a new booking
-            booking = BOOKING.objects.create(
-                userID=request.user,  # Assumes you have user authentication
-                itemID=selected_item,
-                datetime=timezone.now(),
-                payment='not pay'
-            )
-            
-            # Redirect to payment page (you'll implement this later)
-            return redirect('payment', booking_id=booking.bookingID)
+            # Redirect to payment page using premise ID and selected item ID
+            return redirect('food_payment', premise_id=premise.premiseID, item_id=selected_item.itemID)
         
         except ITEM.DoesNotExist:
-            # Handle invalid item selection
-            pass
+            messages.error(request, "Selected item does not exist.")
     
     context = {
         'premise': premise,
@@ -251,7 +243,7 @@ def food_premise(request,premise_id):
     
     return render(request, 'user/food_premise.html', context)
     
-def catering_premise(request,premise_id):
+def catering_premise(request, premise_id):
     user_id = request.session.get('user_id')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
@@ -269,21 +261,11 @@ def catering_premise(request,premise_id):
         
         try:
             selected_item = ITEM.objects.get(itemID=selected_item_id)
-            
-            # Create a new booking
-            booking = BOOKING.objects.create(
-                userID=request.user,  # Assumes you have user authentication
-                itemID=selected_item,
-                datetime=timezone.now(),
-                payment='not pay'
-            )
-            
-            # Redirect to payment page (you'll implement this later)
-            return redirect('payment', booking_id=booking.bookingID)
+            # Redirect to payment page using premise ID and selected item ID
+            return redirect('catering_payment', premise_id=premise.premiseID, item_id=selected_item.itemID)
         
         except ITEM.DoesNotExist:
-            # Handle invalid item selection
-            pass
+            messages.error(request, "Selected item does not exist.")
     
     context = {
         'premise': premise,
@@ -292,7 +274,7 @@ def catering_premise(request,premise_id):
     
     return render(request, 'user/catering_premise.html', context)
 
-def hall_premise(request,premise_id):
+def hall_premise(request, premise_id):
     user_id = request.session.get('user_id')
     if not request.session.get('user_type') == 'user':
         request.session.flush()
@@ -310,21 +292,11 @@ def hall_premise(request,premise_id):
         
         try:
             selected_item = ITEM.objects.get(itemID=selected_item_id)
-            
-            # Create a new booking
-            booking = BOOKING.objects.create(
-                userID=request.user,  # Assumes you have user authentication
-                itemID=selected_item,
-                datetime=timezone.now(),
-                payment='not pay'
-            )
-            
-            # Redirect to payment page (you'll implement this later)
-            return redirect('payment', booking_id=booking.bookingID)
+            # Redirect to payment page using premise ID and selected item ID
+            return redirect('hall_payment', premise_id=premise.premiseID, item_id=selected_item.itemID)
         
         except ITEM.DoesNotExist:
-            # Handle invalid item selection
-            pass
+            messages.error(request, "Selected item does not exist.")
     
     context = {
         'premise': premise,
@@ -748,11 +720,13 @@ def receipt(request):
         messages.error(request, "You do not have permission to view this page. Please login again")
         return redirect('login')
     
-    bookings = BOOKING.objects.all().order_by('-datetime')
+    bookings = BOOKING.objects.filter(userID=user_id).order_by('-datetime')
+    if MERCHANT.objects.filter(userID=user_id):
+        ismerchant = 'yes'
     return render(request, 'user/receipt.html', {
         'bookings': bookings,
         'user_id': user_id,
-        'ismerchant': request.session.get('ismerchant', 'no')
+        'ismerchant': ismerchant,
     })
 
 def user_update(request):
@@ -921,7 +895,6 @@ def add_premise(request):
             premise.save()
             
             messages.success(request, "Premise added successfully!")
-            return redirect('premises')
         
         except (USER.DoesNotExist, MERCHANT.DoesNotExist) as e:
             messages.error(request, "Error: Unable to find merchant account.")
@@ -931,7 +904,434 @@ def add_premise(request):
 
 
 def update_premise(request, premise_id):
-    pass
+    # Check if user is logged in and is a merchant
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    # Get the premise or return 404 if not found
+    premise = get_object_or_404(PREMISE, premiseID=premise_id)
+    
+    # Verify that the premise belongs to the current merchant
+    merchant = MERCHANT.objects.get(userID=user_id)
+    if premise.merchantID != merchant:
+        messages.error(request, "You are not authorized to update this premise")
+        return redirect('premise')
+    
+    if request.method == 'POST':
+        try:
+            # Update premise details
+            premise.premisename = request.POST.get('premisename')
+            premise.premisetype = request.POST.get('premisetype')
+            premise.streetname = request.POST.get('streetname')
+            premise.unit = request.POST.get('unit')
+            premise.poscode = request.POST.get('poscode')
+            premise.statearea = request.POST.get('statearea')
+            
+            # Update image if a new one is uploaded
+            if request.FILES.get('premiseimage'):
+                # Validate image
+                premise.premiseimage = request.FILES['premiseimage']
+            
+           
+            premise.save()
+            
+            messages.success(request, "Premise updated successfully!")
+        
+        except ValidationError as e:
+            # Handle validation errors
+            messages.error(request, str(e))
+    
+    # Render the update premise template
+    return render(request, 'merchant/update_premise.html', {
+        'premise': premise
+    })
 
 def delete_premise(request, premise_id):
-    pass
+    # Check if user is logged in and is a merchant
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to perform this action. Please login again")
+        return redirect('login')
+    
+    try:
+        # Get the premise or return 404 if not found
+        premise = get_object_or_404(PREMISE, premiseID=premise_id)
+        
+        # Verify that the premise belongs to the current merchant
+        merchant = MERCHANT.objects.get(userID=user_id)
+        if premise.merchantID != merchant:
+            messages.error(request, "You are not authorized to delete this premise")
+            return redirect('premise')
+        
+        # Check if the premise has any associated items
+        associated_items = ITEM.objects.filter(premiseID=premise)
+        if associated_items.exists():
+            messages.error(request, "Cannot delete premise. There are items associated with this premise.")
+            return redirect('premise')
+        
+        # Delete the premise image file if it exists
+        if premise.premiseimage:
+            try:
+                os.remove(premise.premiseimage.path)
+            except Exception as file_error:
+                # Log the file deletion error but continue with database deletion
+                messages.error(f"Error deleting premise image: {file_error}")
+        
+        # Delete the premise
+        premise.delete()
+        
+        # Add success message
+        messages.success(request, f"Premise '{premise.premisename}' deleted successfully!")
+        
+        return redirect('premise')
+    
+    except MERCHANT.DoesNotExist:
+        messages.error(request, "Merchant account not found")
+        return redirect('login')
+    
+    except Exception as e:
+        # Catch any unexpected errors
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('premise')
+    
+def items(request):
+    # Check if user is logged in and is a merchant
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    try:
+        # Get the current merchant
+        merchant = MERCHANT.objects.get(userID=user_id)
+        
+        # Retrieve all premises for this merchant
+        premises = PREMISE.objects.filter(merchantID=merchant)
+        
+        # Prepare premises with item count
+        premises_with_items = []
+        for premise in premises:
+            item_count = ITEM.objects.filter(premiseID=premise).count()
+            premises_with_items.append({
+                'premise': premise,
+                'item_count': item_count,
+                'full_address': f"{premise.streetname}, {premise.unit or 'N/A'}, {premise.poscode} {premise.statearea}"
+            })
+        
+        return render(request, 'merchant/items.html', {
+            'premises_with_items': premises_with_items
+        })
+    
+    except MERCHANT.DoesNotExist:
+        messages.error(request, "Merchant account not found")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('merchant_dashboard')
+    
+def premise_items(request, premise_id):
+    # Check if user is logged in and is a merchant
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to view this page. Please login again")
+        return redirect('login')
+    
+    try:
+        # Get the premise or return 404 if not found
+        premise = get_object_or_404(PREMISE, premiseID=premise_id)
+        
+        # Verify that the premise belongs to the current merchant
+        merchant = MERCHANT.objects.get(userID=user_id)
+        if premise.merchantID != merchant:
+            messages.error(request, "You are not authorized to view these items")
+            return redirect('items')
+        
+        # Retrieve all items for this premise
+        items = ITEM.objects.filter(premiseID=premise)
+        
+        return render(request, 'merchant/premise_items.html', {
+            'premise': premise,
+            'items': items
+        })
+    
+    except MERCHANT.DoesNotExist:
+        messages.error(request, "Merchant account not found")
+        return redirect('login')
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('items')
+    
+def add_item(request, premise_id):
+    # [MODIFIED] Added comprehensive user authentication and permission check
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to add items. Please login again.")
+        return redirect('login')
+
+    try:
+        # Get the premise or return 404 if not found
+        premise = get_object_or_404(PREMISE, premiseID=premise_id)
+        
+        # Verify that the premise belongs to the current merchant
+        merchant = MERCHANT.objects.get(userID=user_id)
+        if premise.merchantID != merchant:
+            messages.error(request, "You are not authorized to add items to this premise.")
+            return redirect('items')
+
+        if request.method == 'POST':
+            # [NEW] Item creation with validation
+            item_name = request.POST.get('itemname')
+            price = request.POST.get('price')
+            item_image = request.FILES.get('itemimage')
+
+            # Validation checks
+            if not item_name:
+                messages.error(request, "Item name is required.")
+                return render(request, 'merchant/add_item.html', {'premise': premise})
+
+            try:
+                price = float(price)
+                if price < 0:
+                    raise ValueError("Price cannot be negative")
+            except ValueError:
+                messages.error(request, "Invalid price. Please enter a valid number.")
+                return render(request, 'merchant/add_item.html', {'premise': premise})
+
+            # Create new item
+            new_item = ITEM(
+                itemname=item_name,
+                price=price,
+                itemimage=item_image,
+                premiseID=premise
+            )
+
+            try:
+                new_item.full_clean()  # Validate model constraints
+                new_item.save()
+                messages.success(request, f"Item '{item_name}' added successfully!")
+                return redirect('premise_items', premise_id=premise.premiseID)
+            
+            except ValidationError as e:
+                messages.error(request, f"Validation error: {str(e)}")
+                return render(request, 'merchant/add_item.html', {'premise': premise})
+
+        return render(request, 'merchant/add_item.html', {'premise': premise})
+
+    except MERCHANT.DoesNotExist:
+        messages.error(request, "Merchant account not found")
+        return redirect('login')
+    
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('items')
+
+def update_item(request, item_id):
+    # Check if user is logged in and is a merchant
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to update items")
+        return redirect('login')
+    
+    try:
+        # Get the item or return 404 if not found
+        item = ITEM.objects.get(itemID=item_id)
+        
+        # Verify that the item's premise belongs to the current merchant
+        merchant = MERCHANT.objects.get(userID=user_id)
+        if item.premiseID.merchantID != merchant:
+            messages.error(request, "You are not authorized to update this item")
+            return redirect('items')
+        
+        if request.method == 'POST':
+            try:
+                # Update item details
+                item.itemname = request.POST.get('itemname')
+                item.price = request.POST.get('price')
+                
+                # Handle image update
+                if request.FILES.get('itemimage'):
+                    # Validate image
+                    item.validate_image(request.FILES['itemimage'])
+                    item.itemimage = request.FILES['itemimage']
+
+                premise_id = item.premiseID.premiseID
+
+                item.save()
+                
+                messages.success(request, f"Item '{item.itemname}' updated successfully!")
+                return redirect('premise_items', premise_id=item.premiseID.premiseID)
+            
+            except ValidationError as e:
+                messages.error(request, str(e))
+        
+        return render(request, 'merchant/update_item.html', {
+            'item': item
+        })
+    
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('items')
+
+def delete_item(request, item_id):
+    # [MODIFIED] Added comprehensive user authentication and permission check
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to delete items. Please login again.")
+        return redirect('login')
+
+    try:
+        # Get the item or return 404 if not found
+        item = ITEM.objects.get(itemID=item_id)
+        
+        # Verify that the item belongs to a premise of the current merchant
+        merchant = MERCHANT.objects.get(userID=user_id)
+        if item.premiseID.merchantID != merchant:
+            messages.error(request, "You are not authorized to delete this item.")
+            return redirect('items')
+
+        # Store premise for redirection
+        premise_id = item.premiseID.premiseID
+        
+        # Delete the item
+        item_name = item.itemname  # Store name before deletion
+        item.delete()
+        
+        messages.success(request, f"Item '{item_name}' deleted successfully!")
+        return redirect('premise_items', premise_id=premise_id)
+
+    except MERCHANT.DoesNotExist:
+        messages.error(request, "Merchant account not found")
+        return redirect('login')
+    
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+        return redirect('items')
+
+def food_payment(request, premise_id, item_id):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to delete items. Please login again.")
+        return redirect('login')
+
+    # Fetch the premise and item details
+    premise = PREMISE.objects.get(premiseID=premise_id)
+    item = ITEM.objects.get(itemID=item_id)
+    user = USER.objects.get(userID=user_id)
+
+    if request.method == 'POST':
+        # Process the payment (this is just a placeholder for actual payment processing logic)
+        card_number = request.POST.get('card_number')
+        expiry_date = request.POST.get('expiry_date')
+        cvv = request.POST.get('cvv')
+
+        # Here you would normally handle payment processing logic
+        # For example, calling a payment gateway API
+
+        # Simulate payment success
+        payment_successful = True  # Replace this with actual payment processing result
+
+        if payment_successful:
+            # Create a booking record
+            booking = BOOKING(
+                userID=user,  # Assuming you have a user field in your Booking model
+                itemID=item,
+                payment='paid',  # Or whatever status you want to set
+                datetime = timezone.now()
+            )
+            booking.save()
+            messages.success(request, 'Payment successful! Your booking has been confirmed.')
+            return redirect('food_list')  # Redirect to a success page or user home
+        else:
+            messages.error(request, 'Payment failed. Please try again.')
+
+    return render(request, 'user/food_payment.html', {'premise': premise, 'item': item})
+
+def catering_payment(request, premise_id, item_id):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to delete items. Please login again.")
+        return redirect('login')
+
+    # Fetch the premise and item details
+    premise = PREMISE.objects.get(premiseID=premise_id)
+    item = ITEM.objects.get(itemID=item_id)
+    user = USER.objects.get(userID=user_id)
+
+    if request.method == 'POST':
+        # Process the payment (this is just a placeholder for actual payment processing logic)
+        card_number = request.POST.get('card_number')
+        expiry_date = request.POST.get('expiry_date')
+        cvv = request.POST.get('cvv')
+
+        # Here you would normally handle payment processing logic
+        # For example, calling a payment gateway API
+
+        # Simulate payment success
+        payment_successful = True  # Replace this with actual payment processing result
+
+        if payment_successful:
+            # Create a booking record
+            booking = BOOKING(
+                userID=user,  # Assuming you have a user field in your Booking model
+                itemID=item,
+                payment='paid',  # Or whatever status you want to set
+                datetime = timezone.now()
+            )
+            booking.save()
+            messages.success(request, 'Payment successful! Your booking has been confirmed.')
+            return redirect('catering_list')  # Redirect to a success page or user home
+        else:
+            messages.error(request, 'Payment failed. Please try again.')
+
+    return render(request, 'user/catering_payment.html', {'premise': premise, 'item': item})
+
+def hall_payment(request, premise_id, item_id):
+    user_id = request.session.get('user_id')
+    if not request.session.get('user_type') == 'user':
+        request.session.flush()
+        messages.error(request, "You do not have permission to delete items. Please login again.")
+        return redirect('login')
+
+    # Fetch the premise and item details
+    premise = PREMISE.objects.get(premiseID=premise_id)
+    item = ITEM.objects.get(itemID=item_id)
+    user = USER.objects.get(userID=user_id)
+
+    if request.method == 'POST':
+        # Process the payment (this is just a placeholder for actual payment processing logic)
+        card_number = request.POST.get('card_number')
+        expiry_date = request.POST.get('expiry_date')
+        cvv = request.POST.get('cvv')
+
+        # Here you would normally handle payment processing logic
+        # For example, calling a payment gateway API
+
+        # Simulate payment success
+        payment_successful = True  # Replace this with actual payment processing result
+
+        if payment_successful:
+            # Create a booking record
+            booking = BOOKING(
+                userID=user,  # Assuming you have a user field in your Booking model
+                itemID=item,
+                payment='paid',  # Or whatever status you want to set
+                datetime = timezone.now()
+            )
+            booking.save()
+            messages.success(request, 'Payment successful! Your booking has been confirmed.')
+            return redirect('hall_list')  # Redirect to a success page or user home
+        else:
+            messages.error(request, 'Payment failed. Please try again.')
+
+    return render(request, 'user/hall_payment.html', {'premise': premise, 'item': item})

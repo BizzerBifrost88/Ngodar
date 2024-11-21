@@ -15,9 +15,13 @@ urlpatterns = [
     path('user-home/food-list/food-search/<str:search_query>/', views.food_search, name='food_search'),
     path('user-home/hall-list/hall-search/<str:search_query>/', views.hall_search, name='hall_search'),
     path('user-home/catering-list/catering-search/<str:search_query>/', views.catering_search, name='catering_search'),
-    path('user-home/food-list/food-premise/<int:premise_id>', views.food_premise, name='food_premise'),
-    path('user-home/catering-list/catering-premise/<int:premise_id>', views.catering_premise, name='catering_premise'),
-    path('user-home/hall-list/hall-premise/<int:premise_id>', views.hall_premise, name='hall_premise'),
+    path('user-home/food-list/food-premise/<int:premise_id>/', views.food_premise, name='food_premise'),
+    path('user-home/food-list/food-premise/payment/<int:premise_id>/<int:item_id>/', views.food_payment, name='food_payment'),
+    path('user-home/catering-list/catering-premise/payment/<int:premise_id>/<int:item_id>/', views.catering_payment, name='catering_payment'),
+    path('user-home/hall-list/hall-premise/payment/<int:premise_id>/<int:item_id>/', views.hall_payment, name='hall_payment'),
+
+    path('user-home/catering-list/catering-premise/<int:premise_id>/', views.catering_premise, name='catering_premise'),
+    path('user-home/hall-list/hall-premise/<int:premise_id>/', views.hall_premise, name='hall_premise'),
     path('user-home/location/', views.user_location, name='user_location'),
     path('user-home/location/add-address/', views.add_address, name='add_address'),
     path('user-home/location/use-address/<int:address_id>/', views.use_address, name='use_address'),
@@ -29,11 +33,18 @@ urlpatterns = [
     path('user-home/user-profile/update/', views.user_update, name='user_update'),
     path('user-home/user-profile/update-password/', views.user_update_password, name='user_update_password'),
 
+
     # merchant section
-    path('user-home/merchant-register/', views.merchant_register, name='merchant_register'),
-    path('user-home/merchant-dashboard/', views.merchant_dashboard, name='merchant_dashboard'),
-    path('user-home/premise/', views.premise, name='premise'),
-    path('user-home/premise/add/', views.add_premise, name='add_premise'),
-    path('user-home/premise/update/<int:premise_id>/', views.update_premise, name='update_premise'),
-    path('user-home/premise/delete/<int:premise_id>/', views.delete_premise, name='delete_premise'),
+    path('merchant-home/merchant-register/', views.merchant_register, name='merchant_register'),
+    path('merchant-home/merchant-dashboard/', views.merchant_dashboard, name='merchant_dashboard'),
+    path('merchant-home/premise/', views.premise, name='premise'),
+    path('merchant-home/items/', views.items, name='items'),
+    path('merchant-home/premise/add/', views.add_premise, name='add_premise'),
+    path('merchant-home/premise/update/<int:premise_id>/', views.update_premise, name='update_premise'),
+    path('merchant-home/premise/delete/<int:premise_id>/', views.delete_premise, name='delete_premise'),
+    path('merchant-home/items/<int:premise_id>/', views.premise_items, name='premise_items'),
+    path('merchant-home/items/add_item/<int:premise_id>/', views.add_item, name='add_item'),
+    path('merchant-home/items/delete/<int:item_id>/', views.delete_item, name='delete_item'),
+    path('merchant-home/items/update/<int:item_id>/', views.update_item, name='update_item'),
+
 ] 

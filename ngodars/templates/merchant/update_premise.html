@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Premise - Ngodar</title>
+    <title>Update Premise - Ngodar</title>
     <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -31,7 +31,7 @@
 
     <!-- Main Content -->
     <div class="flex-grow p-8 relative">
-        <h2 class="text-3xl font-bold mb-6 text-green-400">ADD PREMISE</h2>
+        <h2 class="text-3xl font-bold mb-6 text-green-400">UPDATE PREMISE</h2>
         <div class="space-y-2">
             {% if messages %}
                 {% for message in messages %}
@@ -47,7 +47,7 @@
                 {% endfor %}
             {% endif %}
         </div>
-        <!-- Add Premise Form -->
+        <!-- Update Premise Form -->
         <form method="POST" enctype="multipart/form-data" class="bg-gray-800 rounded-lg p-8 animate-fade-in">
             {% csrf_token %}
             
@@ -55,7 +55,7 @@
                 <!-- Premise Name -->
                 <div class="mb-4">
                     <label for="premisename" class="block text-green-400 mb-2">Premise Name</label>
-                    <input type="text" id="premisename" name="premisename" required 
+                    <input type="text" id="premisename" name="premisename" value="{{ premise.premisename }}" required 
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
@@ -65,54 +65,69 @@
                     <select id="premisetype" name="premisetype" required 
                             class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                         <option value="">Select Premise Type</option>
-                        <option value="hall">Hall</option>
-                        <option value="catering">Catering</option>
-                        <option value="food">Food</option>
+                        <option value="hall" {% if premise.premisetype == 'hall' %}selected{% endif %}>Hall</option>
+                        <option value="catering" {% if premise.premisetype == 'catering' %}selected{% endif %}>Catering</option>
+                        <option value="food" {% if premise.premisetype == 'food' %}selected{% endif %}>Food</option>
                     </select>
                 </div>
 
                 <!-- Street Name -->
                 <div class="mb-4">
                     <label for="streetname" class="block text-green-400 mb-2">Street Name</label>
-                    <input type="text" id="streetname" name="streetname" required 
+                    <input type="text" id="streetname" name="streetname" value="{{ premise.streetname }}" required 
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
                 <!-- Unit -->
                 <div class="mb-4">
                     <label for="unit" class="block text-green-400 mb-2">Unit Number</label>
-                    <input type="text" id="unit" name="unit" 
+                    <input type="text" id="unit" name="unit" value="{{ premise.unit }}"
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
                 <!-- Postal Code -->
                 <div class="mb-4">
                     <label for="poscode" class="block text-green-400 mb-2">Postal Code</label>
-                    <input type="text" id="poscode" name="poscode" required 
+                    <input type="text" id="poscode" name="poscode" value="{{ premise.poscode }}" required 
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
                 <!-- State/Area -->
                 <div class="mb-4">
                     <label for="statearea" class="block text-green-400 mb-2">State/Area</label>
-                    <input type="text" id="statearea" name="statearea" required 
+                    <input type="text" id="statearea" name="statearea" value="{{ premise.statearea }}" required 
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500">
                 </div>
 
-                <!-- Premise Image -->
+                <!-- Current Premise Image -->
                 <div class="mb-4 md:col-span-2">
-                    <label for="premiseimage" class="block text-green-400 mb-2">Premise Image (max 5MB, .png, .jpg, .jpeg)</label>
+                    <label class="block text-green-400 mb-2">Current Premise Image</label>
+                    {% if premise.premiseimage %}
+                    <img src="{{ premise.premiseimage.url }}" alt="Current Premise Image" 
+                         class="max-w-full h-48 object-cover rounded-lg mb-4">
+                    {% else %}
+                    <p class="text-gray-400">No image uploaded</p>
+                    {% endif %}
+                </div>
+
+                <!-- Premise Image Update -->
+                <div class="mb-4 md:col-span-2">
+                    <label for="premiseimage" class="block text-green-400 mb-2">Update Premise Image (max 5MB, .png, .jpg, .jpeg)</label>
                     <input type="file" id="premiseimage" name="premiseimage" accept=".png,.jpg,.jpeg" 
                            class="w-full bg-gray-700 border border-gray-600 rounded px-3 py-2 text-white file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-green-500 file:text-white hover:file:bg-green-600">
                 </div>
             </div>
 
             <!-- Submit Button -->
-            <div class="mt-6">
+            <div class="mt-6 flex space-x-4">
                 <button type="submit" 
                         class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-                    Add Premise
+                    Update Premise
                 </button>
+                <a href="{% url 'premise' %}" 
+                   class="bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                    Cancel
+                </a>
             </div>
         </form>
     </div>
