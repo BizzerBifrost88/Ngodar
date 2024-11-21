@@ -26,7 +26,21 @@
             </nav>
         </div>
     </header>
-
+    <div class="space-y-2">
+        {% if messages %}
+            {% for message in messages %}
+                <p class="p-2 text-center rounded-lg border
+                {% if message.tags == 'success' %}
+                    text-green-500 bg-green-100 border-green-500
+                {% elif message.tags == 'error' %}
+                    text-red-500 bg-red-100 border-red-500
+                {% endif %}
+                 ">
+                {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    </div>
     <!-- Premise Details -->
     <section class="container mx-auto mt-8 px-4">
         <div class="bg-gray-800 rounded-lg overflow-hidden shadow-lg mb-8">

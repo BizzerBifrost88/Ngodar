@@ -51,7 +51,21 @@
             </nav>
         </div>
     </header>
-
+    <div class="space-y-2">
+        {% if messages %}
+            {% for message in messages %}
+                <p class="p-2 text-center rounded-lg border
+                {% if message.tags == 'success' %}
+                    text-green-500 bg-green-100 border-green-500
+                {% elif message.tags == 'error' %}
+                    text-red-500 bg-red-100 border-red-500
+                {% endif %}
+                 ">
+                {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    </div>
     <!-- Main Content -->
     <div class="container mx-auto px-4 py-8 flex-grow">
         <div class="max-w-3xl mx-auto">

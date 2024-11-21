@@ -40,15 +40,21 @@
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
     <!-- Messages Section -->
-    {% if messages %}
-        <div class="messages">
+    <div class="space-y-2">
+        {% if messages %}
             {% for message in messages %}
-                <div class="bg-{{ message.tags }} p-4 text-center animate-on-scroll">
-                    {{ message }}
-                </div>
+                <p class="p-2 text-center rounded-lg border
+                {% if message.tags == 'success' %}
+                    text-green-500 bg-green-100 border-green-500
+                {% elif message.tags == 'error' %}
+                    text-red-500 bg-red-100 border-red-500
+                {% endif %}
+                 ">
+                {{ message }}
+                </p>
             {% endfor %}
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-gray-900 shadow-md">

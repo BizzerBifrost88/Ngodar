@@ -80,8 +80,8 @@
                 </div>
             </div>
 
-            {% if messages %}
-                <div class="space-y-2 mb-4">
+            <div class="space-y-2">
+                {% if messages %}
                     {% for message in messages %}
                         <p class="p-2 text-center rounded-lg border
                         {% if message.tags == 'success' %}
@@ -93,8 +93,8 @@
                         {{ message }}
                         </p>
                     {% endfor %}
-                </div>
-            {% endif %}
+                {% endif %}
+            </div>
 
             <!-- Items Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

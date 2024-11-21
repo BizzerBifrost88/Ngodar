@@ -27,6 +27,21 @@
 </head>
 <body class="bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col min-h-screen">
     <!-- Main Content -->
+    <div class="space-y-2">
+        {% if messages %}
+            {% for message in messages %}
+                <p class="p-2 text-center rounded-lg border
+                {% if message.tags == 'success' %}
+                    text-green-500 bg-green-100 border-green-500
+                {% elif message.tags == 'error' %}
+                    text-red-500 bg-red-100 border-red-500
+                {% endif %}
+                 ">
+                {{ message }}
+                </p>
+            {% endfor %}
+        {% endif %}
+    </div>
     <div class="flex-grow flex items-center justify-center">
         <div class="w-full max-w-md space-y-6 animate-popup">
             <!-- Header -->
