@@ -721,13 +721,23 @@ def receipt(request):
         return redirect('login')
     
     bookings = BOOKING.objects.filter(userID=user_id).order_by('-datetime')
+    
     if MERCHANT.objects.filter(userID=user_id):
         ismerchant = 'yes'
-    return render(request, 'user/receipt.html', {
+        context = {
         'bookings': bookings,
-        'user_id': user_id,
-        'ismerchant': ismerchant,
-    })
+            'user_id': user_id,
+            'ismerchant': ismerchant,
+    }
+        return render(request, 'user/receipt.html', context)
+    else:
+        ismerchant = None
+        context = {
+        'bookings': bookings,
+            'user_id': user_id,
+            'ismerchant': ismerchant,
+    }
+        return render(request, 'user/receipt.html', context)
 
 def user_update(request):
     user_id = request.session.get('user_id')
