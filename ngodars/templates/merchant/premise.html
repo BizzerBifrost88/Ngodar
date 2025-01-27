@@ -45,6 +45,9 @@
         .dashboard-section-item:nth-child(3) { animation-delay: 0.3s; }
         .dashboard-section-item:nth-child(4) { animation-delay: 0.4s; }
         .dashboard-section-item:nth-child(5) { animation-delay: 0.5s; }
+        #button_add{
+            position:sticky;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex">
@@ -123,7 +126,7 @@
         </div>
 
         <!-- Add Premise Button - Sticky Bottom -->
-        <div class="fixed bottom-6 right-8 z-10 dashboard-section-item">
+        <div class="fixed bottom-6 right-8 z-10 dashboard-section-item" id="button_add">
             <a href="{% url 'add_premise' %}" 
                class="bg-green-500 hover:bg-green-600 text-white py-3 px-6 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-300 ease-in-out transform hover:scale-105">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -1123,7 +1123,7 @@ def add_item(request, premise_id):
             )
 
             try:
-                new_item.full_clean()  # Validate model constraints
+                
                 new_item.save()
                 messages.success(request, f"Item '{item_name}' added successfully!")
                 return redirect('premise_items', premise_id=premise.premiseID)
@@ -1169,7 +1169,7 @@ def update_item(request, item_id):
                 # Handle image update
                 if request.FILES.get('itemimage'):
                     # Validate image
-                    item.validate_image(request.FILES['itemimage'])
+                    
                     item.itemimage = request.FILES['itemimage']
 
                 premise_id = item.premiseID.premiseID
