@@ -46,5 +46,10 @@ urlpatterns = [
     path('merchant-home/items/add_item/<int:premise_id>/', views.add_item, name='add_item'),
     path('merchant-home/items/delete/<int:item_id>/', views.delete_item, name='delete_item'),
     path('merchant-home/items/update/<int:item_id>/', views.update_item, name='update_item'),
+    
 
+    #ewallet
+    path('ewallet/', views.ewallet, name='ewallet'),
+    path('topup/', views.topup, name='topup'),
+    path('trans_history/', views.trans_history, name='trans_history'),
 ] 

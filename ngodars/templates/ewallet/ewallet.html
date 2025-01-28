@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Wallet - Ngodar</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col min-h-screen">
+    <!-- Header with Back Navigation -->
+    <header class="bg-gray-900 shadow-md p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="{% url 'user_home' %}" class="text-green-400 hover:text-green-500 transition">
+                <span class="text-xl">←</span> Back to Dashboard
+            </a>
+            <h1 class="text-xl font-bold text-white">My E-Wallet</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow container mx-auto px-4 py-8">
+        <!-- Balance Card -->
+        <div class="bg-gray-800 rounded-xl shadow-xl p-6 mb-8">
+            <div class="text-center">
+                <h2 class="text-gray-400 mb-2">Total Balance</h2>
+                <p class="text-4xl font-bold text-green-400">RM {{ user.wallet.balance|default:"0.00" }}</p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <button onclick="location.href=`{% url 'topup' %}`"
+                        class="bg-green-400 text-gray-900 py-3 px-6 rounded-lg font-bold hover:bg-green-500 transition shadow-lg">
+                    Top Up
+                </button>
+                <button onclick="location.href='#'" 
+                        class="bg-gray-700 text-white py-3 px-6 rounded-lg font-bold hover:bg-gray-600 transition shadow-lg">
+                    Transfer
+                </button>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="bg-gray-800 rounded-xl shadow-xl p-6">
+            <h2 class="text-2xl font-bold text-green-400 mb-6">Transaction History</h2>
+            
+            <div class="space-y-2">
+                {% if transactions %}
+                    {% for transaction in transactions %}
+                        <a href="{% url 'transaction_detail' transaction.id %}" 
+                           class="block text-gray-300 hover:text-green-400 transition">
+                            {{ transaction.timestamp|date:"d M Y, H:i" }} - 
+                            {% if transaction.transaction_type == 'TOPUP' %}
+                                Top Up Transaction
+                            {% elif transaction.transaction_type == 'TRANSFER' %}
+                                Transfer Transaction
+                            {% elif transaction.transaction_type == 'RECEIVED' %}
+                                Received Transaction
+                            {% endif %}
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-gray-400">
+                        <p>No transactions yet</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-center py-4 mt-auto">
+        <p class="text-sm text-gray-400">&copy; 2024 Ngodar. All rights reserved.</p>
+    </footer>
+</body>
+</html>

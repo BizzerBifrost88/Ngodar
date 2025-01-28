@@ -1345,3 +1345,12 @@ def hall_payment(request, premise_id, item_id):
             messages.error(request, 'Payment failed. Please try again.')
 
     return render(request, 'user/hall_payment.html', {'premise': premise, 'item': item})
+
+def ewallet(request):
+    return render(request, "ewallet/ewallet.html")
+
+def topup(request):
+    return render(request, 'ewallet/topup.html')
+
+def trans_history(request):
+    return render(request, 'ewallet/trans_history.html')

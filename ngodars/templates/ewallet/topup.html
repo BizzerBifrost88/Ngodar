@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Up - E-Wallet</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.jpg' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-gray-900 to-gray-800 text-white flex flex-col min-h-screen">
+    <!-- Header -->
+    <header class="bg-gray-900 shadow-md p-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <a href="{% url 'ewallet' %}" class="text-green-400 hover:text-green-500 transition">
+                <span class="text-xl">←</span> Back to E-Wallet
+            </a>
+            <h1 class="text-xl font-bold text-white">Top Up</h1>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex-grow container mx-auto px-4 py-8">
+        <div class="max-w-md mx-auto">
+            <!-- Top Up Form -->
+            <div class="bg-gray-800 rounded-xl shadow-xl p-6 mb-8">
+                <h2 class="text-2xl font-bold text-green-400 mb-6 text-center">Enter Amount</h2>
+                <form method="post" action="#" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- Amount Input -->
+                    <div>
+                        <label for="amount" class="block text-sm font-medium text-gray-300 mb-2">Amount (RM)</label>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               min="1" 
+                               step="0.01" 
+                               required
+                               class="w-full px-4 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-gray-600"
+                               placeholder="0.00">
+                    </div>
+
+                    <!-- Quick Amount Selection -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <button type="button" 
+                                onclick="setAmount(10)"
+                                class="amount-btn p-3 rounded-lg bg-gray-700 hover:bg-green-400 hover:text-gray-900 transition focus:outline-none"
+                                data-amount="10">
+                            RM 10
+                        </button>
+                        <button type="button"
+                                onclick="setAmount(20)"
+                                class="amount-btn p-3 rounded-lg bg-gray-700 hover:bg-green-400 hover:text-gray-900 transition focus:outline-none"
+                                data-amount="20">
+                            RM 20
+                        </button>
+                        <button type="button"
+                                onclick="setAmount(30)"
+                                class="amount-btn p-3 rounded-lg bg-gray-700 hover:bg-green-400 hover:text-gray-900 transition focus:outline-none"
+                                data-amount="30">
+                            RM 30
+                        </button>
+                        <button type="button"
+                                onclick="setAmount(40)"
+                                class="amount-btn p-3 rounded-lg bg-gray-700 hover:bg-green-400 hover:text-gray-900 transition focus:outline-none"
+                                data-amount="40">
+                            RM 40
+                        </button>
+                        <button type="button"
+                                onclick="setAmount(50)"
+                                class="amount-btn p-3 rounded-lg bg-gray-700 hover:bg-green-400 hover:text-gray-900 transition focus:outline-none"
+                                data-amount="50">
+                            RM 50
+                        </button>
+                        <button type="button"
+                                onclick="setAmount('other')"
+                                class="amount-btn p-3 rounded-lg bg-gray-700 hover:bg-green-400 hover:text-gray-900 transition focus:outline-none"
+                                data-amount="other">
+                            Others
+                        </button>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit"
+                            class="w-full py-3 rounded-full bg-green-400 text-gray-900 font-bold hover:bg-green-500 hover:text-white transition shadow-lg">
+                        Proceed to Payment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-center py-4 mt-auto">
+        <p class="text-sm text-gray-400">&copy; 2024 Ngodar. All rights reserved.</p>
+    </footer>
+
+    <script>
+        const amountInput = document.getElementById('amount');
+        const amountButtons = document.querySelectorAll('.amount-btn');
+
+        // Function to set amount and update button styles
+        function setAmount(value) {
+            if (value === 'other') {
+                amountInput.value = '';
+                amountInput.focus();
+            } else {
+                amountInput.value = value;
+            }
+            updateButtonStyles();
+        }
+
+        // Function to update button styles based on input value
+        function updateButtonStyles() {
+            const currentAmount = parseInt(amountInput.value);
+            
+            amountButtons.forEach(button => {
+                const buttonAmount = button.dataset.amount;
+                
+                // Remove existing highlight
+                button.classList.remove('bg-green-400', 'text-gray-900', 'bg-gray-700', 'text-white');
+                
+                if (buttonAmount === 'other' && ![10, 20, 30, 40, 50].includes(currentAmount)) {
+                    // Highlight "Others" button if amount doesn't match preset values
+                    button.classList.add('bg-green-400', 'text-gray-900');
+                } else if (parseInt(buttonAmount) === currentAmount) {
+                    // Highlight matching amount button
+                    button.classList.add('bg-green-400', 'text-gray-900');
+                } else {
+                    // Default style for non-matching buttons
+                    button.classList.add('bg-gray-700', 'text-white');
+                }
+            });
+        }
+
+        // Listen for manual input changes
+        amountInput.addEventListener('input', updateButtonStyles);
+
+        // Initial button styles update
+        updateButtonStyles();
+    </script>
+</body>
+</html>
