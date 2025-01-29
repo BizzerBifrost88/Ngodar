@@ -79,3 +79,8 @@ class BOOKING(models.Model):
     datetime = models.DateTimeField(default=None)
     userID = models.ForeignKey(USER, on_delete=models.CASCADE, default=None)
     itemID = models.ForeignKey(ITEM, on_delete=models.CASCADE, default=None)
+
+class EWALLET(models.Model):
+    ewalletID = models.AutoField(primary_key=True)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    userID = models.ForeignKey(USER, on_delete=models.CASCADE, default=None)

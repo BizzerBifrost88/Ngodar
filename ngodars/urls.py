@@ -51,5 +51,5 @@ urlpatterns = [
     #ewallet
     path('ewallet/', views.ewallet, name='ewallet'),
     path('topup/', views.topup, name='topup'),
-    path('trans_history/', views.trans_history, name='trans_history'),
+    path('history/', views.trans_history, name='trans_history'),
 ] 
